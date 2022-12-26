@@ -44,7 +44,7 @@ ARG VITIS_VERSION
 # Download and run the installation
 RUN echo "### XILINX VIVDO INSTALLATION ###"
 RUN echo "Downloading $VIVADO_TAR_FILE from $VIVADO_TAR_HOST"
-RUN wget $VIVADO_TAR_HOST/$VIVADO_TAR_FILE.tar.gz -q
+RUN wget -q $VIVADO_TAR_HOST/$VIVADO_TAR_FILE.tar.gz
 RUN echo "Extracting Vivado tar file"
 RUN tar xzf $VIVADO_TAR_FILE.tar.gz
 RUN ./silent_install.sh -d $VIVADO_TAR_FILE -c 1
@@ -62,7 +62,7 @@ RUN echo "source /opt/Xilinx/Vitis/$VITIS_VERSION/settings64.sh" >> /root/.profi
 
 # Copy license file (root)
 RUN mkdir -p /root/.Xilinx
-COPY *.lic /root/.Xilinx/
+COPY license/*.lic /root/.Xilinx/
 
 ##########################################################################################################
 # User profile
@@ -79,5 +79,5 @@ RUN echo "source /opt/Xilinx/Vitis/$VITIS_VERSION/settings64.sh" >> /home/user/.
 
 # Copy license file
 RUN mkdir /home/user/.Xilinx
-COPY *.lic /home/user/.Xilinx/
+COPY license/*.lic /home/user/.Xilinx/
 

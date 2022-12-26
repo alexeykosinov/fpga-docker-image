@@ -36,11 +36,11 @@ do
             if [ "$OPTARG" == "1" ]; then
                 echo "[ INFO  ] Xilinx Vivado installation begins..."
                 echo "[ INFO  ] tar file: ${XILINX_TAR_FILE}"
-                #/opt/${XILINX_TAR_FILE}/xsetup --agree XilinxEULA,3rdPartyEULA,WebTalkTerms --batch Install --config /opt/install_config/vivado.txt
+                /opt/${XILINX_TAR_FILE}/xsetup --agree XilinxEULA,3rdPartyEULA,WebTalkTerms --batch Install --config /opt/install_config/vivado.txt
             elif [ "$OPTARG" == "2" ]; then
                 echo "[ INFO  ] Xilinx Vitis installation begins..."
                 echo "[ INFO  ] tar file: ${XILINX_TAR_FILE}"
-                #/opt/${XILINX_TAR_FILE}/xsetup --agree XilinxEULA,3rdPartyEULA,WebTalkTerms --batch Install --config /opt/install_config/vitis.txt
+                /opt/${XILINX_TAR_FILE}/xsetup --agree XilinxEULA,3rdPartyEULA,WebTalkTerms --batch Install --config /opt/install_config/vitis.txt
             else
                 echo "[ ERROR ] Wrong command"
                 exit
