@@ -57,7 +57,7 @@ RUN echo "Downloading ${VIVADO_TAR_FILE} from ${VIVADO_TAR_HOST}"
 RUN wget -q -P /opt $VIVADO_TAR_HOST/$VIVADO_TAR_FILE.tar.gz
 RUN ls -l
 RUN echo "Extracting Vivado tar file"
-RUN pv ${VIVADO_TAR_FILE}.tar.gz | tar -xzf - --directory /opt/
+RUN pv /opt/${VIVADO_TAR_FILE}.tar.gz | tar -xzf - --directory /opt/
 #RUN tar xzf ${VIVADO_TAR_FILE}.tar.gz –C /opt/
 RUN ls -l
 RUN cd /opt/
