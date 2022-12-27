@@ -29,7 +29,7 @@ do
                 XILINX_TAR_FILE=$OPTARG
             else
                 echo "[ ERROR ] Directory doesn't exist"
-                exit
+                exit 2
             fi
             ;;
         c)
@@ -43,7 +43,7 @@ do
                 /opt/${XILINX_TAR_FILE}/xsetup --agree XilinxEULA,3rdPartyEULA,WebTalkTerms --batch Install --config /opt/install_config/vitis.txt
             else
                 echo "[ ERROR ] Wrong command"
-                exit
+                exit 2
             fi
             ;;
         o)
@@ -51,7 +51,7 @@ do
             ;;
         ?)
             echo "[ ERROR ] Wrong argument"
-            exit
+            exit 2
             ;;
     esac
 done
