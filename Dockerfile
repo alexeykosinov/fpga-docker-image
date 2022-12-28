@@ -12,20 +12,23 @@
 
 FROM ubuntu:22.04
 
-MAINTAINER Alexey Kosinov <a.kosinov@1440.space>
+LABEL Alexey Kosinov <a.kosinov@1440.space>
 
 
 # Install dependences (Xilinx & Mentor Graphics)
-RUN apt-get update && apt-get -y upgrade && \
+RUN apt-get update && \
   DEBIAN_FRONTEND=noninteractive \
   apt-get install -y \
   apt-utils \
+  coreutils \
   default-jre \
-  xorg \
+  # xorg \
   wget \
   pv \
-  vim \
+  python2 \
+  # vim \
   sudo \
+  locales \
   build-essential \
   libglib2.0-0 \
   libsm6 \
@@ -37,13 +40,36 @@ RUN apt-get update && apt-get -y upgrade && \
   libxft2 \
   lib32ncurses6 \
   libxext6 \
-  git \
+  # git \
   && apt-get clean \
   && rm -rf /var/lib/apt/lists/*
+
+# Set the locale
+RUN sed -i '/en_US.UTF-8/s/^# //g' /etc/locale.gen && locale-gen
+ENV LANG en_US.UTF-8
+ENV LANGUAGE en_US:en
+ENV LC_ALL en_US.UTF-8
+
+# Make a Vivado user
+RUN useradd -m docker && echo "docker:docker" | chpasswd && adduser docker sudo
+# RUN echo '%sudo ALL=(ALL) NOPASSWD:ALL' >> /etc/sudoers
+RUN chmod 777 /home/docker
+# USER docker
+
+ARG HOST_ID="cat /sys/class/net/eth0/address | tr -d ':'"
+
+# RUN echo "export PATH=$PATH:/opt/questasim/linux_x86_64" >> ~/.bashrc
+# RUN echo "export PATH=$PATH:/opt/questasim/RUVM_2021.2" >> ~/.bashrc
+# RUN echo "export LM_LICENSE_FILE=$LM_LICENSE_FILE:/opt/questasim/license.dat" >> ~/.bashrc
+
+ENV PATH="${PATH}:/opt/questasim/linux_x86_64"
+ENV PATH="${PATH}:/opt/questasim/RUVM_2021.2"
+ENV LM_LICENSE_FILE="${LM_LICENSE_FILE}:/opt/questasim/license.dat"
 
 # Copy config dir
 COPY install_config /opt
 COPY silent_install.sh /opt
+COPY questa_install.sh /opt
 
 ARG VIVADO_TAR_HOST
 
@@ -53,47 +79,57 @@ ARG VIVADO_VERSION
 ARG VITIS_VERSION
 
 # Download and run the installation
-RUN echo "Downloading ${VIVADO_TAR_FILE} from ${VIVADO_TAR_HOST}"
-RUN wget -q -P /opt $VIVADO_TAR_HOST/$VIVADO_TAR_FILE.tar.gz
-RUN ls -l
-RUN echo "Extracting Vivado tar file"
-RUN pv /opt/${VIVADO_TAR_FILE}.tar.gz | tar -xzf - --directory /opt/
-#RUN tar xzf ${VIVADO_TAR_FILE}.tar.gz –C /opt/
-RUN ls -l
-RUN cd /opt/
-RUN ls -l
-RUN chmod +x silent_install.sh
-RUN ./silent_install.sh -d ${VIVADO_TAR_FILE} -c 1
-RUN ./silent_install.sh -d ${VIVADO_TAR_FILE} -c 2
-# RUN rm -rf $VIVADO_TAR_FILE*
+# RUN wget -q -P /opt $VIVADO_TAR_HOST/$VIVADO_TAR_FILE.tar.gz \
+# && cd /opt \
+# && pv -f ${VIVADO_TAR_FILE}.tar.gz | tar -xzf - --directory . \
+# && rm -rf ${VIVADO_TAR_FILE}.tar.gz \
+# && chmod +x silent_install.sh \
+# && chmod +x ${VIVADO_TAR_FILE}/xsetup.sh \
+# && ./silent_install.sh -d /opt/${VIVADO_TAR_FILE} -c 1 \
+# && ./silent_install.sh -d /opt/${VIVADO_TAR_FILE} -c 2
 
-
+# Download and run the installation
+RUN wget -q -P /opt $VIVADO_TAR_HOST/QuestaSim_2021.2.1_lin64.tar.gz \
+&& cd /opt \
+&& pv -f QuestaSim_2021.2.1_lin64.tar.gz | tar -xzf - --directory . \
+&& rm -rf QuestaSim_2021.2.1_lin64.tar.gz \
+&& cd QuestaSim_2021.2.1_lin64 \
+&& python2 mgclicgen.py $(eval ${HOST_ID}) \
+&& ls -l \
+&& cd .. \
+&& chmod +x questa_install.sh \
+&& ./questa_install.sh \
+&& ls -l \
+&& cp QuestaSim_2021.2.1_lin64/license.dat /opt/questasim \
+&& cp QuestaSim_2021.2.1_lin64/pubkey_verify /opt/questasim \
+&& cd /opt/questasim \
+&& ls -l \
+&& ls -l bin\
+&& chmod +x pubkey_verify \
+&& ./pubkey_verify -y \
+&& vsim -h \
+&& ip addr
 
 
 # Post installation procedures
 
 # Add vivado tools to path (root)
-RUN echo "source /opt/Xilinx/Vivado/${VIVADO_VERSION}/settings64.sh" >> /root/.profile
-RUN echo "source /opt/Xilinx/Vitis/${VITIS_VERSION}/settings64.sh" >> /root/.profile
+# RUN echo "source /opt/Xilinx/Vivado/${VIVADO_VERSION}/settings64.sh" >> /root/.profile
+# RUN echo "source /opt/Xilinx/Vitis/${VITIS_VERSION}/settings64.sh" >> /root/.profile
 
 # Copy license file (root)
-RUN mkdir -p /root/.Xilinx
-COPY license/*.lic /root/.Xilinx/
+# RUN mkdir -p /root/.Xilinx
+# COPY license/*.lic /root/.Xilinx/
 
 ##########################################################################################################
 # User profile
 ##########################################################################################################
 
-# Make a Vivado user
-RUN adduser --disabled-password --gecos '' user
-USER user
-WORKDIR /home/user
-
 # Add vivado tools to path
-RUN echo "source /opt/Xilinx/Vivado/${VIVADO_VERSION}/settings64.sh" >> /home/user/.profile
-RUN echo "source /opt/Xilinx/Vitis/${VITIS_VERSION}/settings64.sh" >> /home/user/.profile
+RUN echo "source /opt/Xilinx/Vivado/${VIVADO_VERSION}/settings64.sh" >> /home/docker/.profile
+RUN echo "source /opt/Xilinx/Vitis/${VITIS_VERSION}/settings64.sh" >> /home/docker/.profile
 
 # Copy license file
-RUN mkdir /home/user/.Xilinx
-COPY license/*.lic /home/user/.Xilinx/
+RUN mkdir /home/docker/.Xilinx
+COPY license/*.lic /home/docker/.Xilinx/
 
