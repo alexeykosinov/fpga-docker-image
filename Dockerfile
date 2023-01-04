@@ -26,6 +26,7 @@ RUN apt-get update && \
   apt-utils \
   coreutils \
   default-jre \
+  gcc \
   # xorg \
   wget \
   pv \
@@ -98,6 +99,25 @@ ARG QUESTA_TAR_FILE
 ARG VIVADO_VERSION
 ARG VITIS_VERSION
 
+# Download and run the installation Questa Sim
+RUN wget --no-verbose --show-progress --progress=bar:force:noscroll -P /opt $VIVADO_TAR_HOST/${QUESTA_TAR_FILE}.tar.gz \
+&& cd /opt \
+&& pv -f ${QUESTA_TAR_FILE}.tar.gz | tar -xzf - --directory . \
+&& rm -rf ${QUESTA_TAR_FILE}.tar.gz \
+&& cd ${QUESTA_TAR_FILE} \
+&& python2 mgclicgen.py $(eval ${HOST_ID}) \
+&& cd .. \
+&& chmod +x questa_install.sh \
+&& ./questa_install.sh -tgt /opt -msiloc /home/docker \
+&& cp ${QUESTA_TAR_FILE}/license.dat /opt/questasim \
+&& cp ${QUESTA_TAR_FILE}/pubkey_verify /opt/questasim \
+&& cd /opt/questasim \
+&& chmod +x pubkey_verify \
+&& ./pubkey_verify -y \
+&& rm -rf /opt/${QUESTA_TAR_FILE} \
+&& rm -rf /opt/questasim/pubkey_verify \
+&& rm -rf /opt/questa_install.sh
+
 # Vivado, Vitis & Update Download and run the installation
 RUN wget --no-verbose --show-progress --progress=bar:force:noscroll -P /opt $VIVADO_TAR_HOST/${VIVADO_TAR_FILE}.tar.gz \
 && cd /opt \
@@ -116,23 +136,6 @@ RUN wget --no-verbose --show-progress --progress=bar:force:noscroll -P /opt $VIV
 && rm -rf $VIVADO_TAR_UPDATE \
 && rm -rf *.txt
 
-# Download and run the installation Questa Sim
-# RUN wget --no-verbose --show-progress --progress=bar:force:noscroll -P /opt $VIVADO_TAR_HOST/${QUESTA_TAR_FILE}.tar.gz \
-# && cd /opt \
-# && pv -f ${QUESTA_TAR_FILE}.tar.gz | tar -xzf - --directory . \
-# && rm -rf ${QUESTA_TAR_FILE}.tar.gz \
-# && cd ${QUESTA_TAR_FILE} \
-# && python2 mgclicgen.py $(eval ${HOST_ID}) \
-# && cd .. \
-# && chmod +x questa_install.sh \
-# && ./questa_install.sh \
-# && cp ${QUESTA_TAR_FILE}/license.dat /opt/questasim \
-# && cp ${QUESTA_TAR_FILE}/pubkey_verify /opt/questasim \
-# && cd /opt/questasim \
-# && chmod +x pubkey_verify \
-# && ./pubkey_verify -y \
-# && vsim -h \
-# && rm -rf /opt/${QUESTA_TAR_FILE}
 
 
 
@@ -145,7 +148,7 @@ RUN echo "source /opt/Xilinx/Vitis/${VITIS_VERSION}/settings64.sh" >> /root/.pro
 RUN echo "source /opt/Xilinx/Vitis/${VITIS_VERSION}/settings64.sh" >> /home/docker/.profile
 
 # Copy license file
-RUN mkdir /root/.Xilinx
+# RUN mkdir /root/.Xilinx
 RUN mkdir /home/docker/.Xilinx
 
 COPY license/*.lic /root/.Xilinx/
