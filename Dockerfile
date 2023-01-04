@@ -111,15 +111,15 @@ RUN wget --no-verbose --show-progress --progress=bar:force:noscroll -P /opt $VIV
 &&  pv -f ${VIVADO_TAR_FILE}.tar.gz | tar -xzf - --directory . \
 &&  rm -rf ${VIVADO_TAR_FILE}.tar.gz \
 &&  chmod +x $VIVADO_TAR_FILE/xsetup \
-&&  $VIVADO_TAR_FILE/xsetup -a XilinxEULA,3rdPartyEULA -b Install -c vivado.txt \
+# &&  $VIVADO_TAR_FILE/xsetup -a XilinxEULA,3rdPartyEULA -b Install -c vivado.txt \
 &&  $VIVADO_TAR_FILE/xsetup -a XilinxEULA,3rdPartyEULA -b Install -c vitis.txt \
 &&  rm -rf $VIVADO_TAR_FILE \
 &&  wget --no-verbose --show-progress --progress=bar:force:noscroll -P /opt $VIVADO_TAR_HOST/${VIVADO_TAR_UPDATE}.tar.gz \
 &&  pv -f ${VIVADO_TAR_UPDATE}.tar.gz | tar -xzf - --directory . \
 &&  rm -rf ${VIVADO_TAR_UPDATE}.tar.gz \
 &&  chmod +x $VIVADO_TAR_UPDATE/xsetup \
-&&  $VIVADO_TAR_UPDATE/xsetup -a XilinxEULA,3rdPartyEULA -b Update -c vivado.txt \
-# &&  $VIVADO_TAR_UPDATE/xsetup -a XilinxEULA,3rdPartyEULA -b Update -c vitis.txt \
+# &&  $VIVADO_TAR_UPDATE/xsetup -a XilinxEULA,3rdPartyEULA -b Update -c vivado.txt \
+&&  $VIVADO_TAR_UPDATE/xsetup -a XilinxEULA,3rdPartyEULA -b Update -c vitis.txt \
 &&  rm -rf $VIVADO_TAR_UPDATE \
 &&  rm -rf *.txt
 
