@@ -2,6 +2,7 @@
 # sudo docker build \
 # --build-arg VIVADO_TAR_HOST=0.0.0.0:8000 \
 # --build-arg VIVADO_TAR_FILE=Xilinx_Unified_2021.2_1021_0703 \
+# --build-arg VIVADO_TAR_UPDATE=Xilinx_Vivado_Vitis_Update_2021.2.1_1219_1431 \
 # --build-arg VIVADO_VERSION=2021.2 . \
 # --build-arg QUESTA_TAR_FILE=QuestaSim_2021.2.1_lin64 \
 # -t vivado:2021.2
@@ -27,7 +28,6 @@ RUN apt-get update && \
   default-jre \
   # xorg \
   wget \
-  # expect \
   pv \
   python2 \
   # vim \
@@ -86,25 +86,35 @@ RUN echo 'alias vivado="vivado -log /tmp/vivado.log -journal /tmp/vivado.jou"' >
 
 # Xilinx License dir
 ADD install_config /opt
+ADD license /opt
 
 # Questa Sim install script
 COPY questa_install.sh /opt
 
 ARG VIVADO_TAR_HOST
 ARG VIVADO_TAR_FILE
+ARG VIVADO_TAR_UPDATE
 ARG QUESTA_TAR_FILE
 ARG VIVADO_VERSION
 ARG VITIS_VERSION
 
-# Vivado, Vitis & patch Download and run the installation
+# Vivado, Vitis & Update Download and run the installation
 RUN wget --no-verbose --show-progress --progress=bar:force:noscroll -P /opt $VIVADO_TAR_HOST/${VIVADO_TAR_FILE}.tar.gz \
 && cd /opt \
 && pv -f ${VIVADO_TAR_FILE}.tar.gz | tar -xzf - --directory . \
 && rm -rf ${VIVADO_TAR_FILE}.tar.gz \
-&& chmod +x /opt/${VIVADO_TAR_FILE}/xsetup \
-&& /opt/${XILINX_TAR_FILE}/xsetup --agree XilinxEULA,3rdPartyEULA --batch Install --config /opt/vivado.txt \
-&& /opt/${XILINX_TAR_FILE}/xsetup --agree XilinxEULA,3rdPartyEULA --batch Update --config /opt/vitis.txt
-
+&& chmod +x $VIVADO_TAR_FILE/xsetup \
+&& $VIVADO_TAR_FILE/xsetup -a XilinxEULA,3rdPartyEULA -b Install -c vivado.txt \
+&& $VIVADO_TAR_FILE/xsetup -a XilinxEULA,3rdPartyEULA -b Add -c vitis.txt \
+&& rm -rf $VIVADO_TAR_FILE \
+&& wget --no-verbose --show-progress --progress=bar:force:noscroll -P /opt $VIVADO_TAR_HOST/${VIVADO_TAR_UPDATE}.tar.gz \
+&& pv -f ${VIVADO_TAR_UPDATE}.tar.gz | tar -xzf - --directory . \
+&& rm -rf ${VIVADO_TAR_UPDATE}.tar.gz \
+&& chmod +x $VIVADO_TAR_UPDATE/xsetup \
+&& $VIVADO_TAR_UPDATE/xsetup -a XilinxEULA,3rdPartyEULA -b Update -c vivado.txt \
+&& $VIVADO_TAR_UPDATE/xsetup -a XilinxEULA,3rdPartyEULA -b Update -c vitis.txt \
+&& rm -rf $VIVADO_TAR_UPDATE \
+&& rm -rf *.txt
 
 # Download and run the installation Questa Sim
 # RUN wget --no-verbose --show-progress --progress=bar:force:noscroll -P /opt $VIVADO_TAR_HOST/${QUESTA_TAR_FILE}.tar.gz \
@@ -128,16 +138,19 @@ RUN wget --no-verbose --show-progress --progress=bar:force:noscroll -P /opt $VIV
 
 
 # Add vivado tools to path
+RUN echo "source /opt/Xilinx/Vivado/${VIVADO_VERSION}/settings64.sh" >> /root/.profile
 RUN echo "source /opt/Xilinx/Vivado/${VIVADO_VERSION}/settings64.sh" >> /home/docker/.profile
-RUN echo "source /opt/Xilinx/Vivado/${VIVADO_VERSION}/settings64.sh" >> /home/root/.profile
 
-RUN echo "source /opt/Xilinx/Vitis/${VITIS_VERSION}/settings64.sh" >> /home/root/.profile
+RUN echo "source /opt/Xilinx/Vitis/${VITIS_VERSION}/settings64.sh" >> /root/.profile
 RUN echo "source /opt/Xilinx/Vitis/${VITIS_VERSION}/settings64.sh" >> /home/docker/.profile
 
 # Copy license file
-RUN mkdir /home/root/.Xilinx
+RUN mkdir /root/.Xilinx
 RUN mkdir /home/docker/.Xilinx
 
-COPY license/*.lic /home/root/.Xilinx/
+COPY license/*.lic /root/.Xilinx/
 COPY license/*.lic /home/docker/.Xilinx/
 
+RUN rm -rf /opt/*.lic
+
+RUN echo "Docker image build succesfully"
