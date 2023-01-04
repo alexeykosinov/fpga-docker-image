@@ -10,7 +10,7 @@
 # run docker:
 # sudo docker run \
 # --env="DISPLAY" 
-# --volume="$HOME/.Xauthority:/root/.Xauthority:ro" 
+# --volume="$HOME/.Xauthority:/root/.Xauthority:ro"
 # --rm 
 # -it vivado:2021.2
 
@@ -19,7 +19,6 @@ FROM ubuntu:20.04
 
 LABEL Alexey Kosinov <a.kosinov@1440.space>
 
-# Install dependences
 RUN apt-get update && \
     DEBIAN_FRONTEND=noninteractive \
     apt-get install -y \
@@ -52,7 +51,7 @@ RUN apt-get update && \
 &&  apt-get clean \
 &&  rm -rf /var/lib/apt/lists/*
 
-# Set the locale
+# Set locale
 RUN sed -i '/en_US.UTF-8/s/^# //g' /etc/locale.gen && locale-gen
 ENV LANG en_US.UTF-8
 ENV LANGUAGE en_US:en
@@ -125,34 +124,25 @@ RUN wget --no-verbose --show-progress --progress=bar:force:noscroll -P /opt $VIV
 &&  rm -rf *.txt
 
 
-# Add vivado tools to path
-# Env
+# Add tools path, env & etc.
 RUN echo 'PATH="${PATH}:/opt/questasim/linux_x86_64"'                           >> /home/docker/.bashrc \
-&&  echo 'PATH="${PATH}:/opt/questasim/linux_x86_64"'                           >> /root/.bashrc        \
 &&  echo 'PATH="${PATH}:/opt/questasim/RUVM_2021.2"'                            >> /home/docker/.bashrc \
-&&  echo 'PATH="${PATH}:/opt/questasim/RUVM_2021.2"'                            >> /root/.bashrc        \
 &&  echo 'LM_LICENSE_FILE="${LM_LICENSE_FILE}:/opt/questasim/license.dat"'      >> /home/docker/.bashrc \
-&&  echo 'LM_LICENSE_FILE="${LM_LICENSE_FILE}:/opt/questasim/license.dat"'      >> /root/.bashrc        \
 &&  echo 'PATH="${PATH}:/opt/Xilinx/Vivado/2021.2/bin/unwrapped/lnx64.o"'       >> /home/docker/.bashrc \
-&&  echo 'PATH="${PATH}:/opt/Xilinx/Vivado/2021.2/bin/unwrapped/lnx64.o"'       >> /root/.bashrc        \
 &&  echo 'PATH="${PATH}:/opt/Xilinx/Vitis/2021.2/bin/unwrapped/lnx64.o"'        >> /home/docker/.bashrc \
-&&  echo 'PATH="${PATH}:/opt/Xilinx/Vitis/2021.2/bin/unwrapped/lnx64.o"'        >> /root/.bashrc        \
+&&  echo 'PATH="${PATH}:/opt/Xilinx/Vitis_HLS/2021.2/bin/unwrapped/lnx64.o"'    >> /home/docker/.bashrc \
 &&  echo 'XILINX="${XILINX}:/opt/Xilinx"'                                       >> /home/docker/.bashrc \
-&&  echo 'XILINX="${XILINX}:/opt/Xilinx"'                                       >> /root/.bashrc        \
 &&  echo 'alias vivado="vivado -log /tmp/vivado.log -journal /tmp/vivado.jou"'  >> /home/docker/.bashrc \
-&&  echo 'alias vivado="vivado -log /tmp/vivado.log -journal /tmp/vivado.jou"'  >> /root/.bashrc        \
-&&  echo "source /opt/Xilinx/Vivado/${VIVADO_VERSION}/settings64.sh"            >> /root/.bashrc        \
-&&  echo "source /opt/Xilinx/Vivado/${VIVADO_VERSION}/settings64.sh"            >> /home/docker/.bashrc \
-&&  echo "source /opt/Xilinx/Vitis_HLS/${VIVADO_VERSION}/settings64.sh"         >> /root/.bashrc        \
 &&  echo "source /opt/Xilinx/Vitis_HLS/${VIVADO_VERSION}/settings64.sh"         >> /home/docker/.bashrc \
-&&  echo "source /opt/Xilinx/Vitis/${VIVADO_VERSION}/settings64.sh"             >> /root/.bashrc        \
+&&  echo "source /opt/Xilinx/Vivado/${VIVADO_VERSION}/settings64.sh"            >> /home/docker/.bashrc \
 &&  echo "source /opt/Xilinx/Vitis/${VIVADO_VERSION}/settings64.sh"             >> /home/docker/.bashrc
 
 # Copy license file
-COPY license/*.lic /root/.Xilinx/
 USER docker
-RUN mkdir /home/docker/.Xilinx
-COPY license/*.lic /home/docker/.Xilinx/
+RUN mkdir ~/.Xilinx
+COPY license/*.lic ~/.Xilinx/
+
+
 USER root
 
 RUN rm -rf /opt/*.lic
