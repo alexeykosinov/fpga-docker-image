@@ -21,36 +21,36 @@ LABEL Alexey Kosinov <a.kosinov@1440.space>
 
 # Install dependences
 RUN apt-get update && \
-  DEBIAN_FRONTEND=noninteractive \
-  apt-get install -y \
-  --no-install-recommends \
-  apt-utils \
-  coreutils \
-  default-jre \
-  gcc \
-  # xorg \
-  wget \
-  pv \
-  python2 \
-  # vim \
-  sudo \
-  locales \
-  build-essential \
-  libtcmalloc-minimal4 \
-  libglib2.0-0 \
-  libsm6 \
-  libxi6 \
-  libtinfo5 \
-  libxrender1 \
-  libxrandr2 \
-  libfreetype6 \
-  libfontconfig \
-  libxft2 \
-  lib32ncurses6 \
-  libxext6 \
-  # git \
-  && apt-get clean \
-  && rm -rf /var/lib/apt/lists/*
+    DEBIAN_FRONTEND=noninteractive \
+    apt-get install -y \
+    --no-install-recommends \
+    apt-utils \
+    coreutils \
+    default-jre \
+    gcc \
+    xorg \
+    wget \
+    pv \
+    python2 \
+    vim \
+    sudo \
+    locales \
+    build-essential \
+    libtcmalloc-minimal4 \
+    libglib2.0-0 \
+    libsm6 \
+    libxi6 \
+    libtinfo5 \
+    libxrender1 \
+    libxrandr2 \
+    libfreetype6 \
+    libfontconfig \
+    libxft2 \
+    lib32ncurses6 \
+    libxext6 \
+    git \
+&&  apt-get clean \
+&&  rm -rf /var/lib/apt/lists/*
 
 # Set the locale
 RUN sed -i '/en_US.UTF-8/s/^# //g' /etc/locale.gen && locale-gen
@@ -58,21 +58,12 @@ ENV LANG en_US.UTF-8
 ENV LANGUAGE en_US:en
 ENV LC_ALL en_US.UTF-8
 
-# Make a Vivado user
-# RUN useradd -m docker && echo "docker:docker" | chpasswd && adduser docker sudo
-# RUN chmod 777 /home/docker
-
 ARG USER=docker
 ARG PASS="docker"
 RUN useradd -m -s /bin/bash $USER && echo "$USER:$PASS" | chpasswd
 
-
-
 # Get MAC Address (used for the license)
 ARG HOST_ID="cat /sys/class/net/eth0/address | tr -d ':'"
-
-
-
 
 # GPG import xilinx key to verify downloaded packages
 # COPY xilinx-master-signing-key.asc /opt
@@ -87,9 +78,7 @@ ARG HOST_ID="cat /sys/class/net/eth0/address | tr -d ':'"
 # Xilinx License dir
 ADD install_config /opt
 ADD license /opt
-
-# Questa Sim install script
-COPY questa_install.sh /opt
+ADD questa_install.sh /opt
 
 ARG VIVADO_TAR_HOST
 ARG VIVADO_TAR_FILE
@@ -100,22 +89,22 @@ ARG VITIS_VERSION
 
 # Download and run the installation Questa Sim
 RUN wget --no-verbose --show-progress --progress=bar:force:noscroll -P /opt $VIVADO_TAR_HOST/${QUESTA_TAR_FILE}.tar.gz \
-&& cd /opt \
-&& pv -f ${QUESTA_TAR_FILE}.tar.gz | tar -xzf - --directory . \
-&& rm -rf ${QUESTA_TAR_FILE}.tar.gz \
-&& cd ${QUESTA_TAR_FILE} \
-&& python2 mgclicgen.py $(eval ${HOST_ID}) \
-&& cd .. \
-&& chmod +x questa_install.sh \
-&& ./questa_install.sh -tgt /opt -msiloc /home/docker \
-&& cp ${QUESTA_TAR_FILE}/license.dat /opt/questasim \
-&& cp ${QUESTA_TAR_FILE}/pubkey_verify /opt/questasim \
-&& cd /opt/questasim \
-&& chmod +x pubkey_verify \
-&& ./pubkey_verify -y \
-&& rm -rf /opt/${QUESTA_TAR_FILE} \
-&& rm -rf /opt/questasim/pubkey_verify \
-&& rm -rf /opt/questa_install.sh
+&&  cd /opt \
+&&  pv -f ${QUESTA_TAR_FILE}.tar.gz | tar -xzf - --directory . \
+&&  rm -rf ${QUESTA_TAR_FILE}.tar.gz \
+&&  cd ${QUESTA_TAR_FILE} \
+&&  python2 mgclicgen.py $(eval ${HOST_ID}) \
+&&  cd .. \
+&&  chmod +x questa_install.sh \
+&&  ./questa_install.sh -tgt /opt -msiloc /home/docker \
+&&  cp ${QUESTA_TAR_FILE}/license.dat /opt/questasim \
+&&  cp ${QUESTA_TAR_FILE}/pubkey_verify /opt/questasim \
+&&  cd /opt/questasim \
+&&  chmod +x pubkey_verify \
+&&  ./pubkey_verify -y \
+&&  rm -rf /opt/${QUESTA_TAR_FILE} \
+&&  rm -rf /opt/questasim/pubkey_verify \
+&&  rm -rf /opt/questa_install.sh
 
 # Vivado, Vitis & Update Download and run the installation
 RUN wget --no-verbose --show-progress --progress=bar:force:noscroll -P /opt $VIVADO_TAR_HOST/${VIVADO_TAR_FILE}.tar.gz \
