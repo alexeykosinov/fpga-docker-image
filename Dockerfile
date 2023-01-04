@@ -23,6 +23,7 @@ LABEL Alexey Kosinov <a.kosinov@1440.space>
 RUN apt-get update && \
   DEBIAN_FRONTEND=noninteractive \
   apt-get install -y \
+  --no-install-recommends \
   apt-utils \
   coreutils \
   default-jre \
@@ -35,9 +36,11 @@ RUN apt-get update && \
   sudo \
   locales \
   build-essential \
+  libtcmalloc-minimal4 \
   libglib2.0-0 \
   libsm6 \
   libxi6 \
+  libtinfo5 \
   libxrender1 \
   libxrandr2 \
   libfreetype6 \
@@ -56,23 +59,19 @@ ENV LANGUAGE en_US:en
 ENV LC_ALL en_US.UTF-8
 
 # Make a Vivado user
-RUN useradd -m docker && echo "docker:docker" | chpasswd && adduser docker sudo
-RUN chmod 777 /home/docker
+# RUN useradd -m docker && echo "docker:docker" | chpasswd && adduser docker sudo
+# RUN chmod 777 /home/docker
+
+ARG USER=docker
+ARG PASS="docker"
+RUN useradd -m -s /bin/bash $USER && echo "$USER:$PASS" | chpasswd
+
+
 
 # Get MAC Address (used for the license)
 ARG HOST_ID="cat /sys/class/net/eth0/address | tr -d ':'"
 
-# Questa Sim env
-ENV PATH="${PATH}:/opt/questasim/linux_x86_64"
-ENV PATH="${PATH}:/opt/questasim/RUVM_2021.2"
-ENV LM_LICENSE_FILE="${LM_LICENSE_FILE}:/opt/questasim/license.dat"
 
-# Vivado env
-ENV PATH="${PATH}:/opt/Xilinx/Vivado/2021.2/bin/unwrapped/lnx64.o"
-ENV PATH="${PATH}:/opt/Xilinx/Vitis/2021.2/bin/unwrapped/lnx64.o"
-ENV XILINX="${XILINX}:/opt/Xilinx"
-ENV LIBRARY_PATH="${LIBRARY_PATH}:/usr/lib/x86_64-linux-gnu"
-RUN echo 'alias vivado="vivado -log /tmp/vivado.log -journal /tmp/vivado.jou"' >> ~/.bashrc
 
 
 # GPG import xilinx key to verify downloaded packages
@@ -120,40 +119,53 @@ RUN wget --no-verbose --show-progress --progress=bar:force:noscroll -P /opt $VIV
 
 # Vivado, Vitis & Update Download and run the installation
 RUN wget --no-verbose --show-progress --progress=bar:force:noscroll -P /opt $VIVADO_TAR_HOST/${VIVADO_TAR_FILE}.tar.gz \
-&& cd /opt \
-&& pv -f ${VIVADO_TAR_FILE}.tar.gz | tar -xzf - --directory . \
-&& rm -rf ${VIVADO_TAR_FILE}.tar.gz \
-&& chmod +x $VIVADO_TAR_FILE/xsetup \
-&& $VIVADO_TAR_FILE/xsetup -a XilinxEULA,3rdPartyEULA -b Install -c vivado.txt \
-&& $VIVADO_TAR_FILE/xsetup -a XilinxEULA,3rdPartyEULA -b Add -c vitis.txt \
-&& rm -rf $VIVADO_TAR_FILE \
-&& wget --no-verbose --show-progress --progress=bar:force:noscroll -P /opt $VIVADO_TAR_HOST/${VIVADO_TAR_UPDATE}.tar.gz \
-&& pv -f ${VIVADO_TAR_UPDATE}.tar.gz | tar -xzf - --directory . \
-&& rm -rf ${VIVADO_TAR_UPDATE}.tar.gz \
-&& chmod +x $VIVADO_TAR_UPDATE/xsetup \
-&& $VIVADO_TAR_UPDATE/xsetup -a XilinxEULA,3rdPartyEULA -b Update -c vivado.txt \
-&& $VIVADO_TAR_UPDATE/xsetup -a XilinxEULA,3rdPartyEULA -b Update -c vitis.txt \
-&& rm -rf $VIVADO_TAR_UPDATE \
-&& rm -rf *.txt
-
-
-
+&&  cd /opt \
+&&  pv -f ${VIVADO_TAR_FILE}.tar.gz | tar -xzf - --directory . \
+&&  rm -rf ${VIVADO_TAR_FILE}.tar.gz \
+&&  chmod +x $VIVADO_TAR_FILE/xsetup \
+&&  $VIVADO_TAR_FILE/xsetup -a XilinxEULA,3rdPartyEULA -b Install -c vivado.txt \
+&&  $VIVADO_TAR_FILE/xsetup -a XilinxEULA,3rdPartyEULA -b Install -c vitis.txt \
+&&  rm -rf $VIVADO_TAR_FILE \
+&&  wget --no-verbose --show-progress --progress=bar:force:noscroll -P /opt $VIVADO_TAR_HOST/${VIVADO_TAR_UPDATE}.tar.gz \
+&&  pv -f ${VIVADO_TAR_UPDATE}.tar.gz | tar -xzf - --directory . \
+&&  rm -rf ${VIVADO_TAR_UPDATE}.tar.gz \
+&&  chmod +x $VIVADO_TAR_UPDATE/xsetup \
+&&  $VIVADO_TAR_UPDATE/xsetup -a XilinxEULA,3rdPartyEULA -b Update -c vivado.txt \
+# &&  $VIVADO_TAR_UPDATE/xsetup -a XilinxEULA,3rdPartyEULA -b Update -c vitis.txt \
+&&  rm -rf $VIVADO_TAR_UPDATE \
+&&  rm -rf *.txt
 
 
 # Add vivado tools to path
-RUN echo "source /opt/Xilinx/Vivado/${VIVADO_VERSION}/settings64.sh" >> /root/.profile
-RUN echo "source /opt/Xilinx/Vivado/${VIVADO_VERSION}/settings64.sh" >> /home/docker/.profile
-
-RUN echo "source /opt/Xilinx/Vitis/${VITIS_VERSION}/settings64.sh" >> /root/.profile
-RUN echo "source /opt/Xilinx/Vitis/${VITIS_VERSION}/settings64.sh" >> /home/docker/.profile
+# Env
+RUN echo 'PATH="${PATH}:/opt/questasim/linux_x86_64"'                           >> /home/docker/.bashrc \
+&&  echo 'PATH="${PATH}:/opt/questasim/linux_x86_64"'                           >> /root/.bashrc        \
+&&  echo 'PATH="${PATH}:/opt/questasim/RUVM_2021.2"'                            >> /home/docker/.bashrc \
+&&  echo 'PATH="${PATH}:/opt/questasim/RUVM_2021.2"'                            >> /root/.bashrc        \
+&&  echo 'LM_LICENSE_FILE="${LM_LICENSE_FILE}:/opt/questasim/license.dat"'      >> /home/docker/.bashrc \
+&&  echo 'LM_LICENSE_FILE="${LM_LICENSE_FILE}:/opt/questasim/license.dat"'      >> /root/.bashrc        \
+&&  echo 'PATH="${PATH}:/opt/Xilinx/Vivado/2021.2/bin/unwrapped/lnx64.o"'       >> /home/docker/.bashrc \
+&&  echo 'PATH="${PATH}:/opt/Xilinx/Vivado/2021.2/bin/unwrapped/lnx64.o"'       >> /root/.bashrc        \
+&&  echo 'PATH="${PATH}:/opt/Xilinx/Vitis/2021.2/bin/unwrapped/lnx64.o"'        >> /home/docker/.bashrc \
+&&  echo 'PATH="${PATH}:/opt/Xilinx/Vitis/2021.2/bin/unwrapped/lnx64.o"'        >> /root/.bashrc        \
+&&  echo 'XILINX="${XILINX}:/opt/Xilinx"'                                       >> /home/docker/.bashrc \
+&&  echo 'XILINX="${XILINX}:/opt/Xilinx"'                                       >> /root/.bashrc        \
+&&  echo 'alias vivado="vivado -log /tmp/vivado.log -journal /tmp/vivado.jou"'  >> /home/docker/.bashrc \
+&&  echo 'alias vivado="vivado -log /tmp/vivado.log -journal /tmp/vivado.jou"'  >> /root/.bashrc        \
+&&  echo "source /opt/Xilinx/Vivado/${VIVADO_VERSION}/settings64.sh"            >> /root/.bashrc        \
+&&  echo "source /opt/Xilinx/Vivado/${VIVADO_VERSION}/settings64.sh"            >> /home/docker/.bashrc \
+&&  echo "source /opt/Xilinx/Vitis_HLS/${VIVADO_VERSION}/settings64.sh"         >> /root/.bashrc        \
+&&  echo "source /opt/Xilinx/Vitis_HLS/${VIVADO_VERSION}/settings64.sh"         >> /home/docker/.bashrc \
+&&  echo "source /opt/Xilinx/Vitis/${VIVADO_VERSION}/settings64.sh"             >> /root/.bashrc        \
+&&  echo "source /opt/Xilinx/Vitis/${VIVADO_VERSION}/settings64.sh"             >> /home/docker/.bashrc
 
 # Copy license file
-# RUN mkdir /root/.Xilinx
-RUN mkdir /home/docker/.Xilinx
-
 COPY license/*.lic /root/.Xilinx/
+USER docker
+RUN mkdir /home/docker/.Xilinx
 COPY license/*.lic /home/docker/.Xilinx/
+USER root
 
 RUN rm -rf /opt/*.lic
 
-RUN echo "Docker image build succesfully"
+USER docker
