@@ -1,20 +1,3 @@
-# build docker:
-# sudo docker build \
-# --build-arg VIVADO_TAR_HOST=0.0.0.0:8000 \
-# --build-arg VIVADO_TAR_FILE=Xilinx_Unified_2021.2_1021_0703 \
-# --build-arg VIVADO_TAR_UPDATE=Xilinx_Vivado_Vitis_Update_2021.2.1_1219_1431 \
-# --build-arg VIVADO_VERSION=2021.2 . \
-# --build-arg QUESTA_TAR_FILE=QuestaSim_2021.2.1_lin64 \
-# -t vivado:2021.2
-
-# run docker:
-# sudo docker run \
-# --env="DISPLAY" 
-# --volume="$HOME/.Xauthority:/root/.Xauthority:ro"
-# --rm 
-# -it vivado:2021.2
-
-
 FROM ubuntu:20.04
 
 LABEL Alexey Kosinov <a.kosinov@1440.space>
