@@ -1,6 +1,7 @@
 FROM ubuntu:20.04
 
 LABEL Alexey Kosinov <a.kosinov@1440.space>
+LABEL Vivado 2021.2.1 & Questa SIM-64 Docker Image
 
 RUN apt-get update && \
     DEBIAN_FRONTEND=noninteractive \
@@ -47,6 +48,7 @@ ARG HOST_ID="cat /sys/class/net/eth0/address | tr -d ':'"
 ADD license /opt
 ADD vitis_install.txt /opt
 ADD questa_install.sh /opt
+ADD compile_sim.tcl /opt
 
 ARG VIVADO_TAR_HOST
 ARG VIVADO_TAR_FILE
@@ -127,3 +129,15 @@ COPY license/*.lic ~/.Xilinx/
 RUN rm -rf /opt/*.lic
 
 USER jenkins
+
+# Next step is we need to compile simulation libararies for Questa
+# RUN vivado -nolog -nojournal -notrace -mode tcl -source compile_sim.tcl
+
+
+
+
+
+
+
+
+
