@@ -40,22 +40,10 @@ ENV LANG en_US.UTF-8
 ENV LANGUAGE en_US:en
 ENV LC_ALL en_US.UTF-8
 
-ARG USER=docker
-ARG PASS="docker"
-RUN useradd -m -s /bin/bash $USER && echo "$USER:$PASS" | chpasswd
+RUN adduser --disabled-password --shell /bin/bash --gecos '' jenkins
 
 # Get MAC Address (used for the license)
 ARG HOST_ID="cat /sys/class/net/eth0/address | tr -d ':'"
-
-# GPG import xilinx key to verify downloaded packages
-# COPY xilinx-master-signing-key.asc /opt
-# COPY Xilinx_Unified_2021.2_1021_0703.tar.gz.sig /opt
-# COPY Xilinx_Vivado_Vitis_Update_2021.2.1_1219_1431.tar.gz.sig /opt
-# ARG GPG_XIL_KEY="gpg --list-packets /opt/xilinx-master-signing-key.asc | awk '$1=="keyid:"{print$2}'"
-# RUN gpg --list-packets /opt/xilinx-master-signing-key.asc | awk '$1=="keyid:"{print$2}'
-# RUN echo  GPG_XIL_KEY is $(eval ${HOST_ID})
-# RUN expect -c 'spawn gpg --edit-key ${GPG_XIL_KEY} trust quit; send "5\ry\r"; expect eof'
-# RUN gpg --list-keys
 
 # Xilinx License dir
 ADD install_config /opt
@@ -78,7 +66,7 @@ RUN wget --no-verbose --show-progress --progress=bar:force:noscroll -P /opt $VIV
 &&  python2 mgclicgen.py $(eval ${HOST_ID}) \
 &&  cd .. \
 &&  chmod +x questa_install.sh \
-&&  ./questa_install.sh -tgt /opt -msiloc /home/docker \
+&&  ./questa_install.sh -tgt /opt -msiloc /home/jenkins \
 &&  cp ${QUESTA_TAR_FILE}/license.dat /opt/questasim \
 &&  cp ${QUESTA_TAR_FILE}/pubkey_verify /opt/questasim \
 &&  cd /opt/questasim \
@@ -108,26 +96,38 @@ RUN wget --no-verbose --show-progress --progress=bar:force:noscroll -P /opt $VIV
 
 
 # Add tools path, env & etc.
-RUN echo 'PATH="${PATH}:/opt/questasim/linux_x86_64"'                           >> /home/docker/.bashrc \
-&&  echo 'PATH="${PATH}:/opt/questasim/RUVM_2021.2"'                            >> /home/docker/.bashrc \
-&&  echo 'LM_LICENSE_FILE="${LM_LICENSE_FILE}:/opt/questasim/license.dat"'      >> /home/docker/.bashrc \
-&&  echo 'PATH="${PATH}:/opt/Xilinx/Vivado/2021.2/bin/unwrapped/lnx64.o"'       >> /home/docker/.bashrc \
-&&  echo 'PATH="${PATH}:/opt/Xilinx/Vitis/2021.2/bin/unwrapped/lnx64.o"'        >> /home/docker/.bashrc \
-&&  echo 'PATH="${PATH}:/opt/Xilinx/Vitis_HLS/2021.2/bin/unwrapped/lnx64.o"'    >> /home/docker/.bashrc \
-&&  echo 'XILINX="${XILINX}:/opt/Xilinx"'                                       >> /home/docker/.bashrc \
-&&  echo 'alias vivado="vivado -log /tmp/vivado.log -journal /tmp/vivado.jou"'  >> /home/docker/.bashrc \
-&&  echo "source /opt/Xilinx/Vitis_HLS/${VIVADO_VERSION}/settings64.sh"         >> /home/docker/.bashrc \
-&&  echo "source /opt/Xilinx/Vivado/${VIVADO_VERSION}/settings64.sh"            >> /home/docker/.bashrc \
-&&  echo "source /opt/Xilinx/Vitis/${VIVADO_VERSION}/settings64.sh"             >> /home/docker/.bashrc
+RUN echo 'PATH="${PATH}:/opt/questasim/linux_x86_64"'                           >> /home/jenkins/.bashrc \
+&&  echo 'PATH="${PATH}:/opt/questasim/RUVM_2021.2"'                            >> /home/jenkins/.bashrc \
+&&  echo 'LM_LICENSE_FILE="${LM_LICENSE_FILE}:/opt/questasim/license.dat"'      >> /home/jenkins/.bashrc \
+&&  echo 'PATH="${PATH}:/opt/Xilinx/Vivado/2021.2/bin/unwrapped/lnx64.o"'       >> /home/jenkins/.bashrc \
+&&  echo 'PATH="${PATH}:/opt/Xilinx/Vitis/2021.2/bin/unwrapped/lnx64.o"'        >> /home/jenkins/.bashrc \
+&&  echo 'PATH="${PATH}:/opt/Xilinx/Vitis_HLS/2021.2/bin/unwrapped/lnx64.o"'    >> /home/jenkins/.bashrc \
+&&  echo 'XILINX="${XILINX}:/opt/Xilinx"'                                       >> /home/jenkins/.bashrc \
+&&  echo 'alias vivado="vivado -log /tmp/vivado.log -journal /tmp/vivado.jou"'  >> /home/jenkins/.bashrc \
+&&  echo "source /opt/Xilinx/Vitis_HLS/${VIVADO_VERSION}/settings64.sh"         >> /home/jenkins/.bashrc \
+&&  echo "source /opt/Xilinx/Vivado/${VIVADO_VERSION}/settings64.sh"            >> /home/jenkins/.bashrc \
+&&  echo "source /opt/Xilinx/Vitis/${VIVADO_VERSION}/settings64.sh"             >> /home/jenkins/.bashrc
+
+RUN echo 'PATH="${PATH}:/opt/questasim/linux_x86_64"'                           >> /root/.bashrc \
+&&  echo 'PATH="${PATH}:/opt/questasim/RUVM_2021.2"'                            >> /root/.bashrc \
+&&  echo 'LM_LICENSE_FILE="${LM_LICENSE_FILE}:/opt/questasim/license.dat"'      >> /root/.bashrc \
+&&  echo 'PATH="${PATH}:/opt/Xilinx/Vivado/2021.2/bin/unwrapped/lnx64.o"'       >> /root/.bashrc \
+&&  echo 'PATH="${PATH}:/opt/Xilinx/Vitis/2021.2/bin/unwrapped/lnx64.o"'        >> /root/.bashrc \
+&&  echo 'PATH="${PATH}:/opt/Xilinx/Vitis_HLS/2021.2/bin/unwrapped/lnx64.o"'    >> /root/.bashrc \
+&&  echo 'XILINX="${XILINX}:/opt/Xilinx"'                                       >> /root/.bashrc \
+&&  echo 'alias vivado="vivado -log /tmp/vivado.log -journal /tmp/vivado.jou"'  >> /root/.bashrc \
+&&  echo "source /opt/Xilinx/Vitis_HLS/${VIVADO_VERSION}/settings64.sh"         >> /root/.bashrc \
+&&  echo "source /opt/Xilinx/Vivado/${VIVADO_VERSION}/settings64.sh"            >> /root/.bashrc \
+&&  echo "source /opt/Xilinx/Vitis/${VIVADO_VERSION}/settings64.sh"             >> /root/.bashrc
 
 # Copy license file
-USER docker
+USER jenkins
 RUN mkdir ~/.Xilinx
 COPY license/*.lic ~/.Xilinx/
 
-
 USER root
+COPY license/*.lic ~/.Xilinx/
 
 RUN rm -rf /opt/*.lic
 
-USER docker
+USER jenkins
