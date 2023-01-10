@@ -18,13 +18,17 @@ build:
 
 run:
 	@docker run \
-		-w /var/lib/jenkins/workspace/test_vivado \
-		-v /var/lib/jenkins/workspace/test_vivado:/var/lib/jenkins/workspace/test_vivado:rw,z \
-		-v /var/lib/jenkins/workspace/test_vivado@tmp:/var/lib/jenkins/workspace/test_vivado@tmp:rw,z \
+		-w /var/lib/jenkins/workspace/fpga_l1_build \
+		-v /var/lib/jenkins/workspace/fpga_l1_build:/var/lib/jenkins/workspace/fpga_l1_build:rw,z \
+		-v /var/lib/jenkins/workspace/fpga_l1_build@tmp:/var/lib/jenkins/workspace/fpga_l1_build@tmp:rw,z \
 		--rm \
 		-t \
 		--init \
-		-it $(IMAGE_NAME):$(VIVADO_VER)
+		-u root:root \
+		-it \
+		$(IMAGE_NAME):$(VIVADO_VER)
+
+
 
 clean:
 	@docker system prune -a
