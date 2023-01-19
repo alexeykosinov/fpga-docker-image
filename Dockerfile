@@ -56,6 +56,7 @@ ARG VIVADO_TAR_UPDATE
 ARG QUESTA_TAR_FILE
 ARG VIVADO_VERSION
 ARG VITIS_VERSION
+ARG MATLAB_RELEASE=r2022b
 
 # Download and run the installation Questa Sim
 RUN wget --no-verbose --show-progress --progress=bar:force:noscroll -P /opt $VIVADO_TAR_HOST/${QUESTA_TAR_FILE}.tar.gz \
@@ -118,6 +119,10 @@ RUN echo 'PATH="${PATH}:/opt/questasim/linux_x86_64"'                           
 &&  echo "source /opt/Xilinx/Vivado/${VIVADO_VERSION}/settings64.sh"            >> /root/.bashrc \
 &&  echo "source /opt/Xilinx/Vitis/${VIVADO_VERSION}/settings64.sh"             >> /root/.bashrc
 
+# MATLAB installation template
+# RUN 
+# && ./install -mode silent -agreeToLicense yes
+
 # Copy license file
 USER jenkins
 RUN mkdir ~/.Xilinx
@@ -130,7 +135,7 @@ RUN rm -rf /opt/*.lic
 
 USER jenkins
 
-# Next step is we need to compile simulation libararies for Questa
+# Next step is we could compile simulation libararies for Questa
 # RUN vivado -nolog -nojournal -notrace -mode tcl -source compile_sim.tcl
 
 
