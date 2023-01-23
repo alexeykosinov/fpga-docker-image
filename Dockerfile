@@ -29,6 +29,9 @@ RUN apt-get update && \
     libxft2 \
     lib32ncurses6 \
     libxext6 \
+    libxmu6 \
+    libxext-dev \
+    libxt6 \
     git \
 &&  apt-get clean \
 &&  rm -rf /var/lib/apt/lists/*
@@ -49,6 +52,7 @@ ADD license /opt
 ADD vitis_install.txt /opt
 ADD questa_install.sh /opt
 ADD compile_sim.tcl /opt
+ADD matlab_install.txt /opt
 
 ARG VIVADO_TAR_HOST
 ARG VIVADO_TAR_FILE
@@ -56,7 +60,22 @@ ARG VIVADO_TAR_UPDATE
 ARG QUESTA_TAR_FILE
 ARG VIVADO_VERSION
 ARG VITIS_VERSION
-ARG MATLAB_RELEASE=r2022b
+ARG MATLAB_TAR_FILE
+ARG MATLAB_VER
+
+
+# Download and run the installation of MATLAB
+RUN wget --no-verbose --show-progress --progress=bar:force:noscroll -P /opt $VIVADO_TAR_HOST/${MATLAB_TAR_FILE}.tar.gz \
+&&  cd /opt \
+&&  pv -f ${MATLAB_TAR_FILE}.tar.gz | tar -xzf - --directory . \
+&&  rm -rf ${MATLAB_TAR_FILE}.tar.gz \
+&&  chmod -R 777 ${MATLAB_TAR_FILE} \
+&&  cd ${MATLAB_TAR_FILE} \
+&&  chmod +x install \
+&&  ./install -inputFile /opt/matlab_install.txt \
+&& cat /tmp/matlab.log \
+&& cp libmwlmgrimpl.so /opt/Matlab/R2022b/bin/glnxa64/matlab_startup_plugins/lmgrimpl \
+&& rm -rf ${MATLAB_TAR_FILE}
 
 # Download and run the installation Questa Sim
 RUN wget --no-verbose --show-progress --progress=bar:force:noscroll -P /opt $VIVADO_TAR_HOST/${QUESTA_TAR_FILE}.tar.gz \
@@ -105,7 +124,8 @@ RUN echo 'PATH="${PATH}:/opt/questasim/linux_x86_64"'                           
 &&  echo 'alias vivado="vivado -log /tmp/vivado.log -journal /tmp/vivado.jou"'  >> /home/jenkins/.bashrc \
 &&  echo "source /opt/Xilinx/Vitis_HLS/${VIVADO_VERSION}/settings64.sh"         >> /home/jenkins/.bashrc \
 &&  echo "source /opt/Xilinx/Vivado/${VIVADO_VERSION}/settings64.sh"            >> /home/jenkins/.bashrc \
-&&  echo "source /opt/Xilinx/Vitis/${VIVADO_VERSION}/settings64.sh"             >> /home/jenkins/.bashrc
+&&  echo "source /opt/Xilinx/Vitis/${VIVADO_VERSION}/settings64.sh"             >> /home/jenkins/.bashrc \
+&&  echo 'PATH="${PATH}:/opt/Matlab/R2022b/bin"'                                >> /home/jenkins/.bashrc
 
 RUN echo 'PATH="${PATH}:/opt/questasim/linux_x86_64"'                           >> /root/.bashrc \
 &&  echo 'PATH="${PATH}:/opt/questasim/RUVM_2021.2"'                            >> /root/.bashrc \
@@ -117,11 +137,11 @@ RUN echo 'PATH="${PATH}:/opt/questasim/linux_x86_64"'                           
 &&  echo 'alias vivado="vivado -log /tmp/vivado.log -journal /tmp/vivado.jou"'  >> /root/.bashrc \
 &&  echo "source /opt/Xilinx/Vitis_HLS/${VIVADO_VERSION}/settings64.sh"         >> /root/.bashrc \
 &&  echo "source /opt/Xilinx/Vivado/${VIVADO_VERSION}/settings64.sh"            >> /root/.bashrc \
-&&  echo "source /opt/Xilinx/Vitis/${VIVADO_VERSION}/settings64.sh"             >> /root/.bashrc
+&&  echo "source /opt/Xilinx/Vitis/${VIVADO_VERSION}/settings64.sh"             >> /root/.bashrc \
+&&  echo 'PATH="${PATH}:/opt/Matlab/R2022b/bin"'                                >> /root/.bashrc
 
-# MATLAB installation template
-# RUN 
-# && ./install -mode silent -agreeToLicense yes
+
+
 
 # Copy license file
 USER jenkins
