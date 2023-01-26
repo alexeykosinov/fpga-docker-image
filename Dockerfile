@@ -116,7 +116,7 @@ RUN wget --no-verbose --show-progress --progress=bar:force:noscroll -P /opt $VIV
 # Add tools path, env & etc.
 RUN echo 'PATH="${PATH}:/opt/questasim/linux_x86_64"'                           >> /home/jenkins/.bashrc \
 &&  echo 'PATH="${PATH}:/opt/questasim/RUVM_2021.2"'                            >> /home/jenkins/.bashrc \
-&&  echo 'export LM_LICENSE_FILE="/opt/questasim/license.dat"'                         >> /home/jenkins/.bashrc \
+&&  echo 'export LM_LICENSE_FILE="/opt/questasim/license.dat"'                  >> /home/jenkins/.bashrc \
 &&  echo 'PATH="${PATH}:/opt/Xilinx/Vivado/2021.2/bin/unwrapped/lnx64.o"'       >> /home/jenkins/.bashrc \
 &&  echo 'PATH="${PATH}:/opt/Xilinx/Vitis/2021.2/bin/unwrapped/lnx64.o"'        >> /home/jenkins/.bashrc \
 &&  echo 'PATH="${PATH}:/opt/Xilinx/Vitis_HLS/2021.2/bin/unwrapped/lnx64.o"'    >> /home/jenkins/.bashrc \
@@ -129,7 +129,7 @@ RUN echo 'PATH="${PATH}:/opt/questasim/linux_x86_64"'                           
 
 RUN echo 'PATH="${PATH}:/opt/questasim/linux_x86_64"'                           >> /root/.bashrc \
 &&  echo 'PATH="${PATH}:/opt/questasim/RUVM_2021.2"'                            >> /root/.bashrc \
-&&  echo 'export LM_LICENSE_FILE="/opt/questasim/license.dat"'                         >> /root/.bashrc \
+&&  echo 'export LM_LICENSE_FILE="/opt/questasim/license.dat"'                  >> /root/.bashrc \
 &&  echo 'PATH="${PATH}:/opt/Xilinx/Vivado/2021.2/bin/unwrapped/lnx64.o"'       >> /root/.bashrc \
 &&  echo 'PATH="${PATH}:/opt/Xilinx/Vitis/2021.2/bin/unwrapped/lnx64.o"'        >> /root/.bashrc \
 &&  echo 'PATH="${PATH}:/opt/Xilinx/Vitis_HLS/2021.2/bin/unwrapped/lnx64.o"'    >> /root/.bashrc \
