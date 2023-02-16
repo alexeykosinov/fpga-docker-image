@@ -11,7 +11,7 @@ RUN apt-get update && \
     coreutils \
     default-jre \
     gcc \
-    wget \
+    smbclient \
     pv \
     python2 \
     vim \
@@ -54,7 +54,9 @@ ADD questa_install.sh /opt
 ADD compile_sim.tcl /opt
 ADD matlab_install.txt /opt
 
-ARG VIVADO_TAR_HOST
+ARG SMB_HOST
+ARG SMB_USER
+ARG SMB_PWD
 ARG VIVADO_TAR_FILE
 ARG VIVADO_TAR_UPDATE
 ARG QUESTA_TAR_FILE
@@ -63,12 +65,13 @@ ARG VITIS_VERSION
 ARG MATLAB_TAR_FILE
 ARG MATLAB_VER
 
-
 # Download and run the installation of MATLAB
-RUN wget --no-verbose --show-progress --progress=bar:force:noscroll -P /opt $VIVADO_TAR_HOST/${MATLAB_TAR_FILE}.tar.gz \
-&&  cd /opt \
+RUN cd /opt \
+&& smbget smb://${SMB_HOST}/Distrib/Engineering/Matlab/MATLAB_R2022b_Linux/${MATLAB_TAR_FILE}.tar.gz -U "${SMB_USER}%${SMB_PWD}" -q \
+&&  ls -l \
 &&  pv -f ${MATLAB_TAR_FILE}.tar.gz | tar -xzf - --directory . \
 &&  rm -rf ${MATLAB_TAR_FILE}.tar.gz \
+&&  ls -l \
 &&  chmod -R 777 ${MATLAB_TAR_FILE} \
 &&  cd ${MATLAB_TAR_FILE} \
 &&  chmod +x install \
@@ -78,8 +81,8 @@ RUN wget --no-verbose --show-progress --progress=bar:force:noscroll -P /opt $VIV
 && rm -rf ${MATLAB_TAR_FILE}
 
 # Download and run the installation Questa Sim
-RUN wget --no-verbose --show-progress --progress=bar:force:noscroll -P /opt $VIVADO_TAR_HOST/${QUESTA_TAR_FILE}.tar.gz \
-&&  cd /opt \
+RUN cd /opt \
+&&  smbget smb://${SMB_HOST}/Distrib/Engineering/Siemens/${QUESTA_TAR_FILE}.tar.gz -U "${SMB_USER}%${SMB_PWD}" -q \
 &&  pv -f ${QUESTA_TAR_FILE}.tar.gz | tar -xzf - --directory . \
 &&  rm -rf ${QUESTA_TAR_FILE}.tar.gz \
 &&  cd ${QUESTA_TAR_FILE} \
@@ -97,8 +100,8 @@ RUN wget --no-verbose --show-progress --progress=bar:force:noscroll -P /opt $VIV
 &&  rm -rf /opt/questa_install.sh
 
 # Vivado, Vitis & Update Download and run the installation
-RUN wget --no-verbose --show-progress --progress=bar:force:noscroll -P /opt $VIVADO_TAR_HOST/${VIVADO_TAR_FILE}.tar.gz \
-&&  cd /opt \
+RUN cd /opt \
+&&  smbget smb://${SMB_HOST}/Distrib/Engineering/Xilinx/${VIVADO_TAR_FILE}.tar.gz -U "${SMB_USER}%${SMB_PWD}" -q \
 &&  pv -f ${VIVADO_TAR_FILE}.tar.gz | tar -xzf - --directory . \
 &&  rm -rf ${VIVADO_TAR_FILE}.tar.gz \
 &&  chmod +x $VIVADO_TAR_FILE/xsetup \
