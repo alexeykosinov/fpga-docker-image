@@ -33,6 +33,10 @@ RUN apt-get update && \
     libxext-dev \
     libxt6 \
     git \
+    curl \
+    python3.9 \
+    python3.9-distutils \
+    python3.9-dev \
 &&  apt-get clean \
 &&  rm -rf /var/lib/apt/lists/*
 
@@ -42,7 +46,7 @@ ENV LANG en_US.UTF-8
 ENV LANGUAGE en_US:en
 ENV LC_ALL en_US.UTF-8
 
-RUN adduser --disabled-password --shell /bin/bash --gecos '' jenkins
+RUN adduser --disabled-password --uid 1002 --shell /bin/bash --gecos '' jenkins
 
 # Get MAC Address (used for the license)
 ARG HOST_ID="cat /sys/class/net/eth0/address | tr -d ':'"
@@ -65,6 +69,7 @@ ARG VITIS_VERSION
 ARG MATLAB_TAR_FILE
 ARG MATLAB_VER
 
+
 # Download and run the installation of MATLAB
 RUN cd /opt \
 && smbget smb://${SMB_HOST}/Distrib/Engineering/Matlab/MATLAB_R2022b_Linux/${MATLAB_TAR_FILE}.tar.gz -U "${SMB_USER}%${SMB_PWD}" -q \
@@ -86,21 +91,21 @@ RUN cd /opt \
 &&  pv -f ${QUESTA_TAR_FILE}.tar.gz | tar -xzf - --directory . \
 &&  rm -rf ${QUESTA_TAR_FILE}.tar.gz \
 &&  cd ${QUESTA_TAR_FILE} \
-&&  python2 mgclicgen.py $(eval ${HOST_ID}) \
+&&  cp mgclicgen.py /opt \
 &&  cd .. \
 &&  chmod +x questa_install.sh \
 &&  ./questa_install.sh -tgt /opt -msiloc /home/jenkins \
-&&  cp ${QUESTA_TAR_FILE}/license.dat /opt/questasim \
 &&  cp ${QUESTA_TAR_FILE}/pubkey_verify /opt/questasim \
 &&  cd /opt/questasim \
 &&  chmod +x pubkey_verify \
 &&  ./pubkey_verify -y \
 &&  rm -rf /opt/${QUESTA_TAR_FILE} \
 &&  rm -rf /opt/questasim/pubkey_verify \
-&&  rm -rf /opt/questa_install.sh
+&&  rm -rf /opt/questa_install.sh \
+&&  mv /opt/questasim/gcc-7.4.0-linux_x86_64/lib64/libstdc++.so.6 ./libstdc++.so.6.bak
 
 # Vivado, Vitis & Update Download and run the installation
-RUN cd /opt \
+RUN RUN cd /opt \
 &&  smbget smb://${SMB_HOST}/Distrib/Engineering/Xilinx/${VIVADO_TAR_FILE}.tar.gz -U "${SMB_USER}%${SMB_PWD}" -q \
 &&  pv -f ${VIVADO_TAR_FILE}.tar.gz | tar -xzf - --directory . \
 &&  rm -rf ${VIVADO_TAR_FILE}.tar.gz \
@@ -115,6 +120,13 @@ RUN cd /opt \
 &&  rm -rf $VIVADO_TAR_UPDATE \
 &&  rm -rf *.txt
 
+# Install python3.9 as default. Install pip3 and packages
+RUN update-alternatives --install /usr/bin/python3 python3 /usr/bin/python3.9 1 \
+&& update-alternatives --config python3 \
+&& curl https://bootstrap.pypa.io/get-pip.py -o get-pip.py \
+&& python3 get-pip.py \
+&& python3 -m pip install /opt/Matlab/R2022b/extern/engines/python/ \
+&& pip3 install libpython
 
 # Add tools path, env & etc.
 RUN echo 'PATH="${PATH}:/opt/questasim/linux_x86_64"'                           >> /home/jenkins/.bashrc \
@@ -128,7 +140,32 @@ RUN echo 'PATH="${PATH}:/opt/questasim/linux_x86_64"'                           
 &&  echo "source /opt/Xilinx/Vitis_HLS/${VIVADO_VERSION}/settings64.sh"         >> /home/jenkins/.bashrc \
 &&  echo "source /opt/Xilinx/Vivado/${VIVADO_VERSION}/settings64.sh"            >> /home/jenkins/.bashrc \
 &&  echo "source /opt/Xilinx/Vitis/${VIVADO_VERSION}/settings64.sh"             >> /home/jenkins/.bashrc \
-&&  echo 'PATH="${PATH}:/opt/Matlab/R2022b/bin"'                                >> /home/jenkins/.bashrc
+&&  echo 'PATH="${PATH}:/opt/Matlab/R2022b/bin"'                                >> /home/jenkins/.bashrc \
+&&  echo 'PATH="${PATH}:/home/jenkins/.local/bin"'                              >> /home/jenkins/.bashrc \
+&&  echo 'PATH="${PATH}:/tmp/bin"'                                              >> /home/jenkins/.bashrc \
+&&  echo 'pushd /tmp && python2 /opt/mgclicgen.py $(cat /sys/class/net/eth0/address | tr -d ":") && popd' >> /home/jenkins/.profile \
+&&  echo 'mv /tmp/license.dat /opt/questasim/'                                  >> /home/jenkins/.bashrc \
+&&  echo 'export CPATH="/usr/include/x86_64-linux-gnu"'                         >> /home/jenkins/.bashrc \
+&&  echo 'export LIBRARY_PATH="/usr/lib/x86_64-linux-gnu:$LIBRARY_PATH"'        >> /home/jenkins/.bashrc
+
+RUN echo 'PATH="${PATH}:/opt/questasim/linux_x86_64"'                           >> /home/jenkins/.profile \
+&&  echo 'PATH="${PATH}:/opt/questasim/RUVM_2021.2"'                            >> /home/jenkins/.profile \
+&&  echo 'export LM_LICENSE_FILE="/opt/questasim/license.dat"'                  >> /home/jenkins/.profile \
+&&  echo 'PATH="${PATH}:/opt/Xilinx/Vivado/2021.2/bin/unwrapped/lnx64.o"'       >> /home/jenkins/.profile \
+&&  echo 'PATH="${PATH}:/opt/Xilinx/Vitis/2021.2/bin/unwrapped/lnx64.o"'        >> /home/jenkins/.profile \
+&&  echo 'PATH="${PATH}:/opt/Xilinx/Vitis_HLS/2021.2/bin/unwrapped/lnx64.o"'    >> /home/jenkins/.profile \
+&&  echo 'XILINX="${XILINX}:/opt/Xilinx"'                                       >> /home/jenkins/.profile \
+&&  echo 'alias vivado="vivado -log /tmp/vivado.log -journal /tmp/vivado.jou"'  >> /home/jenkins/.profile \
+&&  echo "source /opt/Xilinx/Vitis_HLS/${VIVADO_VERSION}/settings64.sh"         >> /home/jenkins/.profile \
+&&  echo "source /opt/Xilinx/Vivado/${VIVADO_VERSION}/settings64.sh"            >> /home/jenkins/.profile \
+&&  echo "source /opt/Xilinx/Vitis/${VIVADO_VERSION}/settings64.sh"             >> /home/jenkins/.profile \
+&&  echo 'PATH="${PATH}:/opt/Matlab/R2022b/bin"'                                >> /home/jenkins/.profile \
+&&  echo 'PATH="${PATH}:/home/jenkins/.local/bin"'                              >> /home/jenkins/.profile \
+&&  echo 'PATH="${PATH}:/tmp/bin"'                                              >> /home/jenkins/.profile \
+&&  echo 'pushd /tmp && python2 /opt/mgclicgen.py $(cat /sys/class/net/eth0/address | tr -d ":") && popd' >> /home/jenkins/.profile \
+&&  echo 'mv /tmp/license.dat /opt/questasim/'					>> /home/jenkins/.profile \
+&&  echo 'export CPATH="/usr/include/x86_64-linux-gnu"'				>> /home/jenkins/.profile \
+&&  echo 'export LIBRARY_PATH="/usr/lib/x86_64-linux-gnu:$LIBRARY_PATH"'	>> /home/jenkins/.profile
 
 RUN echo 'PATH="${PATH}:/opt/questasim/linux_x86_64"'                           >> /root/.bashrc \
 &&  echo 'PATH="${PATH}:/opt/questasim/RUVM_2021.2"'                            >> /root/.bashrc \
@@ -141,8 +178,13 @@ RUN echo 'PATH="${PATH}:/opt/questasim/linux_x86_64"'                           
 &&  echo "source /opt/Xilinx/Vitis_HLS/${VIVADO_VERSION}/settings64.sh"         >> /root/.bashrc \
 &&  echo "source /opt/Xilinx/Vivado/${VIVADO_VERSION}/settings64.sh"            >> /root/.bashrc \
 &&  echo "source /opt/Xilinx/Vitis/${VIVADO_VERSION}/settings64.sh"             >> /root/.bashrc \
-&&  echo 'PATH="${PATH}:/opt/Matlab/R2022b/bin"'                                >> /root/.bashrc
-
+&&  echo 'PATH="${PATH}:/opt/Matlab/R2022b/bin"'                                >> /root/.bashrc \
+&&  echo 'PATH="${PATH}:/home/jenkins/.local/bin"'                              >> /root/.bashrc \
+&&  echo 'PATH="${PATH}:/tmp/bin"'                                              >> /root/.bashrc \
+&&  echo 'pushd /tmp && python2 /opt/mgclicgen.py $(cat /sys/class/net/eth0/address | tr -d ":") && popd' >> /home/jenkins/.profile \
+&&  echo 'mv /tmp/license.dat /opt/questasim/'                                  >> /root/.bashrc \
+&&  echo 'export CPATH="/usr/include/x86_64-linux-gnu"'                         >> /root/.bashrc \
+&&  echo 'export LIBRARY_PATH="/usr/lib/x86_64-linux-gnu:$LIBRARY_PATH"'        >> /root/.bashrc
 
 
 
@@ -156,16 +198,11 @@ COPY license/*.lic ~/.Xilinx/
 
 RUN rm -rf /opt/*.lic
 
+SHELL ["/bin/bash", "-c"]
+RUN cd /opt/questasim/gcc-5.3.0-linux_x86_64/libexec/gcc/x86_64-unknown-linux-gnu/5.3.0/ && \
+    rm ld && ln -s /usr/bin/ld ld && cd /opt && \
+    . /home/jenkins/.profile && \
+    vivado -nojournal -notrace -mode batch -source /opt/compile_sim.tcl
+
 USER jenkins
-
-# Next step is we could compile simulation libararies for Questa
-# RUN vivado -nolog -nojournal -notrace -mode tcl -source compile_sim.tcl
-
-
-
-
-
-
-
-
 
