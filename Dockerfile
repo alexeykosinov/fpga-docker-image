@@ -73,10 +73,8 @@ ARG MATLAB_VER
 # Download and run the installation of MATLAB
 RUN cd /opt \
 && smbget smb://${SMB_HOST}/Distrib/Engineering/Matlab/MATLAB_R2022b_Linux/${MATLAB_TAR_FILE}.tar.gz -U "${SMB_USER}%${SMB_PWD}" -q \
-&&  ls -l \
 &&  pv -f ${MATLAB_TAR_FILE}.tar.gz | tar -xzf - --directory . \
 &&  rm -rf ${MATLAB_TAR_FILE}.tar.gz \
-&&  ls -l \
 &&  chmod -R 777 ${MATLAB_TAR_FILE} \
 &&  cd ${MATLAB_TAR_FILE} \
 &&  chmod +x install \
@@ -105,14 +103,16 @@ RUN cd /opt \
 &&  mv /opt/questasim/gcc-7.4.0-linux_x86_64/lib64/libstdc++.so.6 ./libstdc++.so.6.bak
 
 # Vivado, Vitis & Update Download and run the installation
-RUN RUN cd /opt \
+RUN cd /opt \
 &&  smbget smb://${SMB_HOST}/Distrib/Engineering/Xilinx/${VIVADO_TAR_FILE}.tar.gz -U "${SMB_USER}%${SMB_PWD}" -q \
 &&  pv -f ${VIVADO_TAR_FILE}.tar.gz | tar -xzf - --directory . \
 &&  rm -rf ${VIVADO_TAR_FILE}.tar.gz \
 &&  chmod +x $VIVADO_TAR_FILE/xsetup \
 &&  $VIVADO_TAR_FILE/xsetup -a XilinxEULA,3rdPartyEULA -b Install -c vitis_install.txt \
-&&  rm -rf $VIVADO_TAR_FILE \
-&&  wget --no-verbose --show-progress --progress=bar:force:noscroll -P /opt $VIVADO_TAR_HOST/${VIVADO_TAR_UPDATE}.tar.gz \
+&&  rm -rf $VIVADO_TAR_FILE
+
+RUN cd /opt \
+&&  smbget smb://${SMB_HOST}/Distrib/Engineering/Xilinx/${VIVADO_TAR_UPDATE}.tar.gz -U "${SMB_USER}%${SMB_PWD}" -q \
 &&  pv -f ${VIVADO_TAR_UPDATE}.tar.gz | tar -xzf - --directory . \
 &&  rm -rf ${VIVADO_TAR_UPDATE}.tar.gz \
 &&  chmod +x $VIVADO_TAR_UPDATE/xsetup \
