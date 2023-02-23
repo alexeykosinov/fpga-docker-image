@@ -72,7 +72,7 @@ ARG MATLAB_VER
 
 # Download and run the installation of MATLAB
 RUN cd /opt \
-&& smbget smb://${SMB_HOST}/Distrib/Engineering/Matlab/MATLAB_R2022b_Linux/${MATLAB_TAR_FILE}.tar.gz -U "${SMB_USER}%${SMB_PWD}" -q \
+&& smbget smb://${SMB_HOST}/Distrib/Engineering/Matlab/MATLAB_R2022b_Linux/${MATLAB_TAR_FILE}.tar.gz -U "${SMB_USER}%${SMB_PWD}" -v \
 &&  pv -f ${MATLAB_TAR_FILE}.tar.gz | tar -xzf - --directory . \
 &&  rm -rf ${MATLAB_TAR_FILE}.tar.gz \
 &&  chmod -R 777 ${MATLAB_TAR_FILE} \
@@ -83,9 +83,9 @@ RUN cd /opt \
 && cp libmwlmgrimpl.so /opt/Matlab/R2022b/bin/glnxa64/matlab_startup_plugins/lmgrimpl \
 && rm -rf ${MATLAB_TAR_FILE}
 
-# Download and run the installation Questa Sim
+# Download and run the installation of Questa Sim
 RUN cd /opt \
-&&  smbget smb://${SMB_HOST}/Distrib/Engineering/Siemens/${QUESTA_TAR_FILE}.tar.gz -U "${SMB_USER}%${SMB_PWD}" -q \
+&&  smbget smb://${SMB_HOST}/Distrib/Engineering/Siemens/${QUESTA_TAR_FILE}.tar.gz -U "${SMB_USER}%${SMB_PWD}" -v \
 &&  pv -f ${QUESTA_TAR_FILE}.tar.gz | tar -xzf - --directory . \
 &&  rm -rf ${QUESTA_TAR_FILE}.tar.gz \
 &&  cd ${QUESTA_TAR_FILE} \
@@ -102,17 +102,19 @@ RUN cd /opt \
 &&  rm -rf /opt/questa_install.sh \
 &&  mv /opt/questasim/gcc-7.4.0-linux_x86_64/lib64/libstdc++.so.6 ./libstdc++.so.6.bak
 
-# Vivado, Vitis & Update Download and run the installation
+# Vivado & Vitis download and run the installation
 RUN cd /opt \
-&&  smbget smb://${SMB_HOST}/Distrib/Engineering/Xilinx/${VIVADO_TAR_FILE}.tar.gz -U "${SMB_USER}%${SMB_PWD}" -q \
+&&  smbget smb://${SMB_HOST}/Distrib/Engineering/Xilinx/${VIVADO_TAR_FILE}.tar.gz -U "${SMB_USER}%${SMB_PWD}" -v \
 &&  pv -f ${VIVADO_TAR_FILE}.tar.gz | tar -xzf - --directory . \
 &&  rm -rf ${VIVADO_TAR_FILE}.tar.gz \
 &&  chmod +x $VIVADO_TAR_FILE/xsetup \
 &&  $VIVADO_TAR_FILE/xsetup -a XilinxEULA,3rdPartyEULA -b Install -c vitis_install.txt \
 &&  rm -rf $VIVADO_TAR_FILE
 
+# Vivado & Vitis updates download and install
 RUN cd /opt \
-&&  smbget smb://${SMB_HOST}/Distrib/Engineering/Xilinx/${VIVADO_TAR_UPDATE}.tar.gz -U "${SMB_USER}%${SMB_PWD}" -q \
+&&  smbget smb://${SMB_HOST}/Distrib/Engineering/Xilinx/${VIVADO_TAR_UPDATE}.tar.gz -U "${SMB_USER}%${SMB_PWD}" -v \
+&&  ls -lh \
 &&  pv -f ${VIVADO_TAR_UPDATE}.tar.gz | tar -xzf - --directory . \
 &&  rm -rf ${VIVADO_TAR_UPDATE}.tar.gz \
 &&  chmod +x $VIVADO_TAR_UPDATE/xsetup \
