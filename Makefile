@@ -25,19 +25,13 @@ build:
 
 run:
 	@docker run \
-		-w /var/lib/jenkins/workspace/fpga_l1_build \
-		-v /var/lib/jenkins/workspace/fpga_l1_build:/var/lib/jenkins/workspace/fpga_l1_build:rw,z \
-		-v /var/lib/jenkins/workspace/fpga_l1_build@tmp:/var/lib/jenkins/workspace/fpga_l1_build@tmp:rw,z \
 		--rm \
 		-t \
 		--init \
-		-u root:root \
 		-it \
 		$(IMAGE_NAME):$(VIVADO_VER)
 
-
-
 clean:
-	@docker system prune -a
+	@docker rmi $(docker images -q $(IMAGE_NAME))
 
 .PHONY: build run clean

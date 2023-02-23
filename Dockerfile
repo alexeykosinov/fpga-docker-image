@@ -114,7 +114,6 @@ RUN cd /opt \
 # Vivado & Vitis updates download and install
 RUN cd /opt \
 &&  smbget smb://${SMB_HOST}/Distrib/Engineering/Xilinx/${VIVADO_TAR_UPDATE}.tar.gz -U "${SMB_USER}%${SMB_PWD}" -v \
-&&  ls -lh \
 &&  pv -f ${VIVADO_TAR_UPDATE}.tar.gz | tar -xzf - --directory . \
 &&  rm -rf ${VIVADO_TAR_UPDATE}.tar.gz \
 &&  chmod +x $VIVADO_TAR_UPDATE/xsetup \
