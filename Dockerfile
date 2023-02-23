@@ -82,6 +82,7 @@ RUN cd /opt \
 && cat /tmp/matlab.log \
 && cp libmwlmgrimpl.so /opt/Matlab/R2022b/bin/glnxa64/matlab_startup_plugins/lmgrimpl \
 && rm -rf ${MATLAB_TAR_FILE}
+&& rm -rf /opt/${MATLAB_TAR_FILE}
 
 # Download and run the installation of Questa Sim
 RUN cd /opt \
