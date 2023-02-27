@@ -31,7 +31,6 @@ run:
 		-t \
 		--init \
 		-it \
-		-u root:root \
 		$(IMAGE_NAME):$(VIVADO_VER)
 
 clean:
