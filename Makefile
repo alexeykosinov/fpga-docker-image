@@ -10,6 +10,8 @@ BUILD_QUESTA_TAR_F:=QuestaSim_2021.2.1_lin64
 BUILD_MATLAB_TAR_F:=Matlab913Lin
 VIVADO_VER:=2021.2
 
+GET_IMAGE_ID:=$(shell docker images ${IMAGE_NAME} -a -q)
+
 build:
 	@docker build \
 		--build-arg SMB_HOST=$(DOWNLOAD_HOST) \
@@ -29,9 +31,10 @@ run:
 		-t \
 		--init \
 		-it \
+		-u root:root \
 		$(IMAGE_NAME):$(VIVADO_VER)
 
 clean:
-	@docker rmi $(docker images -q $(IMAGE_NAME))
+	docker rmi $(GET_IMAGE_ID)
 
 .PHONY: build run clean
