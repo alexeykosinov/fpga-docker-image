@@ -1,7 +1,7 @@
 FROM ubuntu:20.04
 
 LABEL Alexey Kosinov <a.kosinov@1440.space>
-LABEL Vivado 2021.2.1 & Questa SIM-64 Docker Image
+LABEL Vivado 2021.2.1 & Questa SIM-64 & MATLAB R2022b Docker Image
 
 RUN apt-get update && \
     DEBIAN_FRONTEND=noninteractive \
@@ -81,7 +81,8 @@ RUN cd /opt \
 &&  ./install -inputFile /opt/matlab_install.txt \
 && cat /tmp/matlab.log \
 && cp libmwlmgrimpl.so /opt/Matlab/R2022b/bin/glnxa64/matlab_startup_plugins/lmgrimpl \
-&& rm -rf ${MATLAB_TAR_FILE}
+&& rm -rf ${MATLAB_TAR_FILE} \
+&& rm -rf /opt/${MATLAB_TAR_FILE}
 
 # Download and run the installation of Questa Sim
 RUN cd /opt \
@@ -198,10 +199,18 @@ COPY license/*.lic ~/.Xilinx/
 RUN rm -rf /opt/*.lic
 
 SHELL ["/bin/bash", "-c"]
+
+# Workaround for Questa's libs conflict
 RUN cd /opt/questasim/gcc-5.3.0-linux_x86_64/libexec/gcc/x86_64-unknown-linux-gnu/5.3.0/ \
-&&  rm ld && ln -s /usr/bin/ld ld && cd /opt \
-&&  . /home/jenkins/.profile \
-&&  vivado -nojournal -notrace -mode batch -source /opt/compile_sim.tcl
+&&  rm ld && ln -s /usr/bin/ld ld
+
+# Compile Xilinx's libs and attach compiled libs to QuestaSim modelsim.ini
+RUN . /home/jenkins/.profile \
+&&  vivado -nojournal -notrace -mode batch -source /opt/compile_sim.tcl \
+&&  chmod 666 /opt/questasim/modelsim.ini \
+&&  for folder in /opt/questasim/xilinx/*; do vmap -modelsimini /opt/questasim/modelsim.ini $(basename $folder) $folder; done \
+&&  chmod 444 /opt/questasim/modelsim.ini
+
 
 USER jenkins
 

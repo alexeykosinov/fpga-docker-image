@@ -19,3 +19,4 @@ product.WLAN_Toolbox
 product.Wavelet_Toolbox
 product.Wireless_HDL_Toolbox
 product.Wireless_Testbench
+product.Fixed-Point_Designer
