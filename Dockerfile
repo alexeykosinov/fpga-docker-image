@@ -1,6 +1,7 @@
 FROM ubuntu:20.04
 
 LABEL Alexey Kosinov <a.kosinov@1440.space>
+LABEL Vladislav Borshch <v.borshch@1440.space>
 LABEL Vivado 2021.2.1 & Questa SIM-64 Docker Image
 
 RUN apt-get update && \
@@ -166,9 +167,23 @@ SHELL ["/bin/bash", "-c"]
 
 # Workaround for Questa's libs conflict
 RUN cd /opt/questasim/gcc-5.3.0-linux_x86_64/libexec/gcc/x86_64-unknown-linux-gnu/5.3.0/ \
-&&  rm ld && ln -s /usr/bin/ld ld && cd /opt \
-&&  . /home/jenkins/.profile \
-&&  vivado -nojournal -notrace -mode batch -source /opt/compile_sim.tcl
+&&  rm ld && ln -s /usr/bin/ld ld
+
+# Compile Xilinx's libs and attach compiled libs to QuestaSim modelsim.ini
+RUN . /home/jenkins/.profile \
+&&  export CPATH=/usr/include/x86_64-linux-gnu \
+&&  export LIBRARY_PATH=/usr/lib/x86_64-linux-gnu:$LIBRARY_PATH \
+&&  export PATH=$PATH:/opt/questasim/linux_x86_64 \
+&&  source /opt/Xilinx/Vivado/${VIVADO_VERSION}/settings64.sh \
+&&  vivado -nojournal -notrace -mode batch -source /opt/compile_sim.tcl \
+&&  chmod 666 /opt/questasim/modelsim.ini \
+&&  for folder in /opt/questasim/xilinx/*; do vmap -modelsimini /opt/questasim/modelsim.ini $(basename $folder) $folder; done \
+&&  chmod 444 /opt/questasim/modelsim.ini
+
+# Duplicate host user
+# COPY entrypoint.sh /usr/local/bin/entrypoint.sh
+# RUN chmod +x /usr/local/bin/entrypoint.sh
+# ENTRYPOINT ["/usr/local/bin/entrypoint.sh"]
 
 USER jenkins
 
