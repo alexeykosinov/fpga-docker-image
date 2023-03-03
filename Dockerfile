@@ -144,6 +144,8 @@ COPY license /opt/Xilinx/
 # Not really necessary, just to make it easier to install packages on the run...
 RUN echo "root:docker" | chpasswd
 
+SHELL ["/bin/bash", "-c"]
+
 # Workaround for Questa's libs conflict
 RUN cd /opt/questasim/gcc-5.3.0-linux_x86_64/libexec/gcc/x86_64-unknown-linux-gnu/5.3.0/ \
 &&  rm ld && ln -s /usr/bin/ld ld
@@ -161,5 +163,5 @@ RUN export CPATH=/usr/include/x86_64-linux-gnu \
 # Duplicate host user
 COPY entrypoint.sh /usr/local/bin/entrypoint.sh
 RUN chmod +x /usr/local/bin/entrypoint.sh
-ENTRYPOINT ["/usr/local/bin/entrypoint.sh ${VIVADO_VERSION}"]
+ENTRYPOINT ["/usr/local/bin/entrypoint.sh"]
 CMD ["/bin/bash", "-l"]
