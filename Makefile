@@ -22,6 +22,8 @@ build:
 		--build-arg QUESTA_TAR_FILE=$(BUILD_QUESTA_TAR_F) \
 		--build-arg MATLAB_TAR_FILE=$(BUILD_MATLAB_TAR_F) \
 		--build-arg VIVADO_VERSION=$(VIVADO_VER) \
+		--no-cache \
+		--rm \
 		. \
 		-t $(IMAGE_NAME):$(VIVADO_VER)
 
