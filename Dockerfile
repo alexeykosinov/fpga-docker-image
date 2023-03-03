@@ -55,7 +55,7 @@ ENV LANG en_US.UTF-8
 ENV LANGUAGE en_US:en
 ENV LC_ALL en_US.UTF-8
 
-RUN adduser --disabled-password --uid 1002 --shell /bin/bash --gecos '' jenkins
+RUN adduser --disabled-password --uid 1002 --shell /bin/bash --gecos '' docker
 
 # Get MAC Address (used for the license)
 ARG HOST_ID="cat /sys/class/net/eth0/address | tr -d ':'"
@@ -101,7 +101,7 @@ RUN cd /opt \
 &&  cp mgclicgen.py /opt \
 &&  cd .. \
 &&  chmod +x questa_install.sh \
-&&  ./questa_install.sh -tgt /opt -msiloc /home/jenkins \
+&&  ./questa_install.sh -tgt /opt -msiloc /home/docker \
 &&  cp ${QUESTA_TAR_FILE}/pubkey_verify /opt/questasim \
 &&  cd /opt/questasim \
 &&  chmod +x pubkey_verify \
@@ -109,8 +109,7 @@ RUN cd /opt \
 &&  rm -rf /opt/${QUESTA_TAR_FILE} \
 &&  rm -rf /opt/questasim/pubkey_verify \
 &&  rm -rf /opt/questa_install.sh \
-&&  mv /opt/questasim/gcc-7.4.0-linux_x86_64/lib64/libstdc++.so.6 ./libstdc++.so.6.bak \
-&&  chown -R jenkins /opt/questasim/
+&&  mv /opt/questasim/gcc-7.4.0-linux_x86_64/lib64/libstdc++.so.6 ./libstdc++.so.6.bak
 
 # Vivado & Vitis download and run the installation
 RUN cd /opt \
@@ -139,39 +138,18 @@ RUN update-alternatives --install /usr/bin/python3 python3 /usr/bin/python3.9 1 
 && python3 -m pip install /opt/Matlab/R2022b/extern/engines/python/ \
 && pip3 install libpython
 
-# Add tools path, env & etc.
-RUN echo 'PATH="${PATH}:/opt/questasim/linux_x86_64"'                                                       >> /home/jenkins/.bashrc \
-&&  echo 'PATH="${PATH}:/opt/questasim/RUVM_2021.2"'                                                        >> /home/jenkins/.bashrc \
-&&  echo 'PATH="${PATH}:/opt/Matlab/R2022b/bin"'                                                            >> /home/jenkins/.bashrc \
-&&  echo 'PATH="${PATH}:/opt/Xilinx/Vivado/2021.2/bin/unwrapped/lnx64.o"'                                   >> /home/jenkins/.bashrc \
-&&  echo 'PATH="${PATH}:/opt/Xilinx/Vitis/2021.2/bin/unwrapped/lnx64.o"'                                    >> /home/jenkins/.bashrc \
-&&  echo 'PATH="${PATH}:/opt/Xilinx/Vitis_HLS/2021.2/bin/unwrapped/lnx64.o"'                                >> /home/jenkins/.bashrc \
-&&  echo 'export LM_LICENSE_FILE="/opt/questasim/license.dat"'                                              >> /home/jenkins/.bashrc \
-&&  echo 'export XILINXD_LICENSE_FILE="/opt/Xilinx/xilinx_vivado.lic"'                                      >> /home/jenkins/.bashrc \
-&&  echo 'export LD_PRELOAD=/lib/x86_64-linux-gnu/libudev.so.1'                                             >> /home/jenkins/.bashrc \
-&&  echo 'XILINX="${XILINX}:/opt/Xilinx"'                                                                   >> /home/jenkins/.bashrc \
-&&  echo 'alias vivado="vivado -log /tmp/vivado.log -journal /tmp/vivado.jou"'                              >> /home/jenkins/.bashrc \
-&&  echo "source /opt/Xilinx/Vivado/${VIVADO_VERSION}/settings64.sh"                                        >> /home/jenkins/.bashrc
-
-# Generate Questa Sim license on the fly
-RUN echo 'pushd /tmp && python2 /opt/mgclicgen.py $(cat /sys/class/net/eth0/address | tr -d ":") && popd'   >> /home/jenkins/.profile \
-&&  echo 'mv /tmp/license.dat /opt/questasim/'                                                              >> /home/jenkins/.profile
-
 # Copy Xilinx licenses to Xilinx folder
 COPY license /opt/Xilinx/
 
 # Not really necessary, just to make it easier to install packages on the run...
 RUN echo "root:docker" | chpasswd
 
-SHELL ["/bin/bash", "-c"]
-
 # Workaround for Questa's libs conflict
 RUN cd /opt/questasim/gcc-5.3.0-linux_x86_64/libexec/gcc/x86_64-unknown-linux-gnu/5.3.0/ \
 &&  rm ld && ln -s /usr/bin/ld ld
 
 # Compile Xilinx's libs and attach compiled libs to QuestaSim modelsim.ini
-RUN . /home/jenkins/.profile \
-&&  export CPATH=/usr/include/x86_64-linux-gnu \
+RUN export CPATH=/usr/include/x86_64-linux-gnu \
 &&  export LIBRARY_PATH=/usr/lib/x86_64-linux-gnu:$LIBRARY_PATH \
 &&  export PATH=$PATH:/opt/questasim/linux_x86_64 \
 &&  source /opt/Xilinx/Vivado/${VIVADO_VERSION}/settings64.sh \
@@ -181,9 +159,7 @@ RUN . /home/jenkins/.profile \
 &&  chmod 444 /opt/questasim/modelsim.ini
 
 # Duplicate host user
-# COPY entrypoint.sh /usr/local/bin/entrypoint.sh
-# RUN chmod +x /usr/local/bin/entrypoint.sh
-# ENTRYPOINT ["/usr/local/bin/entrypoint.sh"]
-
-USER jenkins
-
+COPY entrypoint.sh /usr/local/bin/entrypoint.sh
+RUN chmod +x /usr/local/bin/entrypoint.sh
+ENTRYPOINT ["/usr/local/bin/entrypoint.sh ${VIVADO_VERSION}"]
+CMD ["/bin/bash", "-l"]

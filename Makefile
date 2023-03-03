@@ -29,9 +29,14 @@ build:
 
 run:
 	@docker run \
+		--init \
+		--shm-size=256m \
+		-e LOCAL_UID=$(id -u $USER) \
+		-e LOCAL_GID=$(id -g $USER) \
+		-e USER=$USER \
+		-w $HOME \
 		--rm \
 		-t \
-		--init \
 		-it \
 		$(IMAGE_NAME):$(VIVADO_VER)
 
