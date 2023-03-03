@@ -2,7 +2,7 @@ FROM ubuntu:20.04
 
 LABEL Alexey Kosinov <a.kosinov@1440.space>
 LABEL Vladislav Borshch <v.borshch@1440.space>
-LABEL Vivado 2021.2.1 & Questa SIM-64 Docker Image
+LABEL Vivado 2021.2.1, Questa SIM-64 2021.2 & Matlab R2022b Docker Image
 
 RUN apt-get update && \
     DEBIAN_FRONTEND=noninteractive \
