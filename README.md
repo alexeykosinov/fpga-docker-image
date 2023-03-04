@@ -14,14 +14,19 @@ xsetup --agree XilinxEULA,3rdPartyEULA,WebTalkTerms --batch Install --config ins
 
 ## 2. Docker file
 
-Build:
+Building:
 ```
 make build
 ```
 
-And run:
+Running:
 ```
 make run
+```
+
+And cleaning:
+```
+make clean
 ```
 
 For the tests run http server:
