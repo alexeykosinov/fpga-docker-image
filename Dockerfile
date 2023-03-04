@@ -87,10 +87,10 @@ RUN cd /opt \
 &&  cd ${MATLAB_TAR_FILE} \
 &&  chmod +x install \
 &&  ./install -inputFile /opt/matlab_install.txt \
-&& cat /tmp/matlab.log \
-&& cp libmwlmgrimpl.so /opt/Matlab/R2022b/bin/glnxa64/matlab_startup_plugins/lmgrimpl \
-&& rm -rf ${MATLAB_TAR_FILE} \
-&& rm -rf /opt/${MATLAB_TAR_FILE}
+&&  cat /tmp/matlab.log \
+&&  cp libmwlmgrimpl.so /opt/Matlab/R2022b/bin/glnxa64/matlab_startup_plugins/lmgrimpl \
+&&  rm -rf ${MATLAB_TAR_FILE} \
+&&  rm -rf /opt/${MATLAB_TAR_FILE}
 
 # Download and run the installation of Questa Sim
 RUN cd /opt \
@@ -132,11 +132,11 @@ RUN cd /opt \
 
 # Install python3.9 as default. Install pip3 and packages
 RUN update-alternatives --install /usr/bin/python3 python3 /usr/bin/python3.9 1 \
-&& update-alternatives --config python3 \
-&& curl https://bootstrap.pypa.io/get-pip.py -o get-pip.py \
-&& python3 get-pip.py \
-&& python3 -m pip install /opt/Matlab/R2022b/extern/engines/python/ \
-&& pip3 install libpython
+&&  update-alternatives --config python3 \
+&&  curl https://bootstrap.pypa.io/get-pip.py -o get-pip.py \
+&&  python3 get-pip.py \
+&&  python3 -m pip install /opt/Matlab/R2022b/extern/engines/python/ \
+&&  pip3 install libpython
 
 # Copy Xilinx licenses to Xilinx folder
 COPY license /opt/Xilinx/
