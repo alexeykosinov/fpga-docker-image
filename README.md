@@ -9,6 +9,7 @@
 - [x] Building Vitis projects (PS)
 - [x] Building Vitis HLS projects
 - [x] Matlab support
+- [x] Running multiple copy of image on the single host
 - [x] Questa Sim precompiled Xilinx libraries from the box
 - [x] Questa Sim rtl simulation
 - [-] Questa Sim rtl simulation with UVM
