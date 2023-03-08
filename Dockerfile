@@ -132,7 +132,8 @@ RUN cd /opt \
 # Install python3.9 as default. Install pip3 and packages
 RUN update-alternatives --install /usr/bin/python3 python3 /usr/bin/python3.9 1 \
 &&  update-alternatives --config python3 \
-&&  umask 022 && pip install libpython cocotb
+&&  umask 022 && pip install libpython \
+&&  python3 -m pip install /opt/Matlab/R2022b/extern/engines/python
 
 # Copy Xilinx licenses to Xilinx folder
 COPY license /opt/Xilinx/
