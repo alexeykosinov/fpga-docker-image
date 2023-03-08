@@ -7,8 +7,13 @@ GROUP_ID=${LOCAL_GID:-1000}
 echo "Starting with UID: $USER_ID, GID: $GROUP_ID, USER: $USER"
 
 if [[ -n "$USER_ID" ]]; then
-    # Create user
-    export HOME=/home/${USER#*@}/${USER%%@*}
+    # Check if there is some kinky username with the domain
+    if grep -q "@" <<< "$USER"; then
+        export HOME=/home/${USER#*@}/${USER%%@*}
+    else
+        export HOME=/home/$USER
+    fi
+
     useradd -s /bin/bash -u $USER_ID -o -d $HOME $USER
     usermod -aG sudo $USER
     echo ${USER}:jenkins | chpasswd
