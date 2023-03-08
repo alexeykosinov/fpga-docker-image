@@ -46,6 +46,7 @@ RUN apt-get update && \
     python3.9 \
     python3.9-distutils \
     python3.9-dev \
+    python3-pip \
 &&  apt-get clean \
 &&  rm -rf /var/lib/apt/lists/*
 
@@ -55,10 +56,8 @@ ENV LANG en_US.UTF-8
 ENV LANGUAGE en_US:en
 ENV LC_ALL en_US.UTF-8
 
-RUN adduser --disabled-password --uid 1002 --shell /bin/bash --gecos '' docker
-
-# Get MAC Address (used for the license)
-ARG HOST_ID="cat /sys/class/net/eth0/address | tr -d ':'"
+RUN adduser --disabled-password --shell /bin/bash --gecos '' docker
+RUN echo docker:help | chpasswd
 
 # Xilinx License dir
 ADD vitis_install.txt /opt
@@ -133,10 +132,7 @@ RUN cd /opt \
 # Install python3.9 as default. Install pip3 and packages
 RUN update-alternatives --install /usr/bin/python3 python3 /usr/bin/python3.9 1 \
 &&  update-alternatives --config python3 \
-&&  curl https://bootstrap.pypa.io/get-pip.py -o get-pip.py \
-&&  python3 get-pip.py \
-&&  python3 -m pip install /opt/Matlab/R2022b/extern/engines/python/ \
-&&  pip3 install libpython
+&&  umask 022 && pip install libpython cocotb
 
 # Copy Xilinx licenses to Xilinx folder
 COPY license /opt/Xilinx/
