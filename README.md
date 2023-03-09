@@ -16,7 +16,7 @@
 - [-] Questa Sim rtl simulation with DPI support
 - [-] cocotb support
 - [-] compatibility with Jenkins
-- [-] port forwarding (for remote uploading firmware)
+- [+] port forwarding (for remote uploading firmware)
 
 ## 1. Setting up Xilinx installer
 
