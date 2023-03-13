@@ -24,6 +24,7 @@ build:
 		--build-arg VIVADO_VERSION=$(VIVADO_VER) \
 		--no-cache \
 		--rm \
+		--force-rm \
 		. \
 		-t $(IMAGE_NAME):$(VIVADO_VER)
 
@@ -31,10 +32,6 @@ run:
 	@docker run \
 		--init \
 		--shm-size=256m \
-		-e LOCAL_UID=$(shell id -u) \
-		-e LOCAL_GID=$(shell id -g) \
-		-e USER=$(USER) \
-		-w $(HOME) \
 		--rm \
 		-t \
 		-it \
