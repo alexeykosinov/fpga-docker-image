@@ -31,10 +31,6 @@ run:
 	@docker run \
 		--init \
 		--shm-size=256m \
-		-e LOCAL_UID=$(shell id -u) \
-		-e LOCAL_GID=$(shell id -g) \
-		-e USER=$(USER) \
-		-w $(HOME) \
 		--rm \
 		-t \
 		-it \
