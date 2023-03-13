@@ -24,6 +24,7 @@ build:
 		--build-arg VIVADO_VERSION=$(VIVADO_VER) \
 		--no-cache \
 		--rm \
+		--force-rm \
 		. \
 		-t $(IMAGE_NAME):$(VIVADO_VER)
 
