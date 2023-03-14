@@ -33,6 +33,7 @@ run:
 		--init \
 		--shm-size=256m \
 		--rm \
+		-u root:root \
 		-t \
 		-it \
 		$(IMAGE_NAME):$(VIVADO_VER)

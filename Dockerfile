@@ -157,8 +157,21 @@ RUN export CPATH=/usr/include/x86_64-linux-gnu \
 &&  for folder in /opt/questasim/xilinx/*; do vmap -modelsimini /opt/questasim/modelsim.ini $(basename $folder) $folder; done \
 &&  chmod 444 /opt/questasim/modelsim.ini
 
+RUN echo 'PATH="${PATH}:/opt/questasim/linux_x86_64"'                                                       >> /root/.bashrc \
+&&  echo 'PATH="${PATH}:/opt/questasim/RUVM_2021.2"'                                                        >> /root/.bashrc \
+&&  echo 'PATH="${PATH}:/opt/Matlab/R2022b/bin"'                                                            >> /root/.bashrc \
+&&  echo 'PATH="${PATH}:$(find /opt/Xilinx/Vivado/* -maxdepth 0 -type d)/bin/unwrapped/lnx64.o"'            >> /root/.bashrc \
+&&  echo 'PATH="${PATH}:$(find /opt/Xilinx/Vitis/* -maxdepth 0 -type d)/bin/unwrapped/lnx64.o"'             >> /root/.bashrc \
+&&  echo 'PATH="${PATH}:$(find /opt/Xilinx/Vitis_HLS/* -maxdepth 0 -type d)/bin/unwrapped/lnx64.o"'         >> /root/.bashrc \
+&&  echo 'alias vivado="vivado -log /tmp/vivado.log -journal /tmp/vivado.jou"'                              >> /root/.bashrc \
+&&  echo 'LM_LICENSE_FILE="/opt/questasim/license.dat"'                                                     >> /root/.bashrc \
+&&  echo 'XILINXD_LICENSE_FILE="/opt/Xilinx/xilinx_vivado.lic"'                                             >> /root/.bashrc \
+&&  echo 'LD_PRELOAD="/lib/x86_64-linux-gnu/libudev.so.1"'                                                  >> /root/.bashrc \
+&&  echo 'source $(find /opt/Xilinx/Vivado/* -maxdepth 0 -type d)/settings64.sh'                            >> /root/.bashrc
+
 # Duplicate host user
 COPY entrypoint.sh /usr/local/bin/entrypoint.sh
 RUN chmod +x /usr/local/bin/entrypoint.sh
 ENTRYPOINT ["/usr/local/bin/entrypoint.sh"]
+
 CMD ["/bin/bash", "-l"]
