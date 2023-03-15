@@ -164,9 +164,9 @@ RUN echo 'PATH="${PATH}:/opt/questasim/linux_x86_64"'                           
 &&  echo 'PATH="${PATH}:$(find /opt/Xilinx/Vitis/* -maxdepth 0 -type d)/bin/unwrapped/lnx64.o"'             >> /root/.bashrc \
 &&  echo 'PATH="${PATH}:$(find /opt/Xilinx/Vitis_HLS/* -maxdepth 0 -type d)/bin/unwrapped/lnx64.o"'         >> /root/.bashrc \
 &&  echo 'alias vivado="vivado -log /tmp/vivado.log -journal /tmp/vivado.jou"'                              >> /root/.bashrc \
-&&  echo 'LM_LICENSE_FILE="/opt/questasim/license.dat"'                                                     >> /root/.bashrc \
-&&  echo 'XILINXD_LICENSE_FILE="/opt/Xilinx/xilinx_vivado.lic"'                                             >> /root/.bashrc \
-&&  echo 'LD_PRELOAD="/lib/x86_64-linux-gnu/libudev.so.1"'                                                  >> /root/.bashrc \
+&&  echo 'export LM_LICENSE_FILE="/opt/questasim/license.dat"'                                              >> /root/.bashrc \
+&&  echo 'export XILINXD_LICENSE_FILE="/opt/Xilinx/xilinx_vivado.lic"'                                      >> /root/.bashrc \
+&&  echo 'export LD_PRELOAD="/lib/x86_64-linux-gnu/libudev.so.1"'                                           >> /root/.bashrc \
 &&  echo 'source $(find /opt/Xilinx/Vivado/* -maxdepth 0 -type d)/settings64.sh'                            >> /root/.bashrc
 
 # Duplicate host user
