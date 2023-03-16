@@ -22,8 +22,7 @@ echo "Execute environment script"
 # source $(find /opt/Xilinx/Vivado/* -maxdepth 0 -type d)/settings64.sh
 
 # Generate Questa Sim license on the fly
-echo "Generate Questa SIM-64 license file"
-pushd /tmp && python2 /opt/mgclicgen.py $(cat /sys/class/net/eth0/address | tr -d ":") && popd
+pushd /tmp > /dev/null && python2 /opt/mgclicgen.py $(cat /sys/class/net/eth0/address | tr -d ":") && popd > /dev/null
 mv /tmp/license.dat /opt/questasim/
 
 exec /usr/sbin/gosu "$USER" "$@"
