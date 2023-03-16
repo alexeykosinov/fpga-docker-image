@@ -158,17 +158,17 @@ RUN export CPATH=/usr/include/x86_64-linux-gnu \
 &&  for folder in /opt/questasim/xilinx/*; do vmap -modelsimini /opt/questasim/modelsim.ini $(basename $folder) $folder; done \
 &&  chmod 444 /opt/questasim/modelsim.ini
 
-RUN echo 'PATH="${PATH}:/opt/questasim/linux_x86_64"'                                                       >> /root/.bashrc \
-&&  echo 'PATH="${PATH}:/opt/questasim/RUVM_2021.2"'                                                        >> /root/.bashrc \
-&&  echo 'PATH="${PATH}:/opt/Matlab/R2022b/bin"'                                                            >> /root/.bashrc \
-&&  echo 'PATH="${PATH}:$(find /opt/Xilinx/Vivado/* -maxdepth 0 -type d)/bin/unwrapped/lnx64.o"'            >> /root/.bashrc \
-&&  echo 'PATH="${PATH}:$(find /opt/Xilinx/Vitis/* -maxdepth 0 -type d)/bin/unwrapped/lnx64.o"'             >> /root/.bashrc \
-&&  echo 'PATH="${PATH}:$(find /opt/Xilinx/Vitis_HLS/* -maxdepth 0 -type d)/bin/unwrapped/lnx64.o"'         >> /root/.bashrc \
-&&  echo 'alias vivado="vivado -log /tmp/vivado.log -journal /tmp/vivado.jou"'                              >> /root/.bashrc \
-&&  echo 'export LM_LICENSE_FILE="/opt/questasim/license.dat"'                                              >> /root/.bashrc \
-&&  echo 'export XILINXD_LICENSE_FILE="/opt/Xilinx/xilinx_vivado.lic"'                                      >> /root/.bashrc \
-&&  echo 'export LD_PRELOAD="/lib/x86_64-linux-gnu/libudev.so.1"'                                           >> /root/.bashrc \
-&&  echo 'source $(find /opt/Xilinx/Vivado/* -maxdepth 0 -type d)/settings64.sh'                            >> /root/.bashrc
+RUN echo 'PATH="${PATH}:/opt/questasim/linux_x86_64"'                                               >> /root/.bashrc \
+&&  echo 'PATH="${PATH}:/opt/questasim/RUVM_2021.2"'                                                >> /root/.bashrc \
+&&  echo 'PATH="${PATH}:/opt/Matlab/R2022b/bin"'                                                    >> /root/.bashrc \
+&&  echo 'PATH="${PATH}:$(find /opt/Xilinx/Vivado/* -maxdepth 0 -type d)/bin/unwrapped/lnx64.o"'    >> /root/.bashrc \
+&&  echo 'PATH="${PATH}:$(find /opt/Xilinx/Vitis/* -maxdepth 0 -type d)/bin/unwrapped/lnx64.o"'     >> /root/.bashrc \
+&&  echo 'PATH="${PATH}:$(find /opt/Xilinx/Vitis_HLS/* -maxdepth 0 -type d)/bin/unwrapped/lnx64.o"' >> /root/.bashrc \
+&&  echo 'alias vivado="vivado -log /tmp/vivado.log -journal /tmp/vivado.jou"'                      >> /root/.bashrc \
+&&  echo 'export LM_LICENSE_FILE="/opt/questasim/license.dat"'                                      >> /root/.bashrc \
+&&  echo 'export XILINXD_LICENSE_FILE="/opt/Xilinx/xilinx_vivado.lic"'                              >> /root/.bashrc \
+&&  echo 'export LD_PRELOAD="/lib/x86_64-linux-gnu/libudev.so.1"'                                   >> /root/.bashrc \
+&&  echo 'source $(find /opt/Xilinx/Vivado/* -maxdepth 0 -type d)/settings64.sh'                    >> /root/.bashrc
 
 COPY setup_env.sh /usr/local/bin/setup_env.sh
 RUN chmod +x /usr/local/bin/setup_env.sh
