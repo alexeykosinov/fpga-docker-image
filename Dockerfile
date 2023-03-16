@@ -152,7 +152,6 @@ RUN export CPATH=/usr/include/x86_64-linux-gnu \
 &&  export LIBRARY_PATH=/usr/lib/x86_64-linux-gnu:$LIBRARY_PATH \
 &&  export PATH=$PATH:/opt/questasim/linux_x86_64 \
 &&  source /opt/Xilinx/Vivado/${VIVADO_VERSION}/settings64.sh \
-&&  cd /opt/questasim/xilinx/ \
 &&  vivado -nojournal -notrace -mode batch -source /opt/compile_sim.tcl \
 &&  chmod 666 /opt/questasim/modelsim.ini \
 &&  for folder in /opt/questasim/xilinx/*; do vmap -modelsimini /opt/questasim/modelsim.ini $(basename $folder) $folder; done \
