@@ -170,7 +170,9 @@ RUN echo 'PATH="${PATH}:/opt/questasim/linux_x86_64"'                           
 &&  echo 'export LD_PRELOAD="/lib/x86_64-linux-gnu/libudev.so.1"'                                           >> /root/.bashrc \
 &&  echo 'source $(find /opt/Xilinx/Vivado/* -maxdepth 0 -type d)/settings64.sh'                            >> /root/.bashrc
 
-# Duplicate host user
+COPY setup_env.sh /usr/local/bin/setup_env.sh
+RUN chmod +x /usr/local/bin/setup_env.sh
+
 COPY entrypoint.sh /usr/local/bin/entrypoint.sh
 RUN chmod +x /usr/local/bin/entrypoint.sh
 ENTRYPOINT ["/usr/local/bin/entrypoint.sh"]
