@@ -16,7 +16,7 @@
 - [ ] Questa Sim rtl simulation with DPI support
 - [x] cocotb support
 - [x] compatibility with Jenkins
-- [+] port forwarding (for remote uploading firmware)
+- [x] port forwarding (for remote uploading firmware)
 
 # Setting up
 
